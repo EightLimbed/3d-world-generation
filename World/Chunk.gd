@@ -70,6 +70,9 @@ func generate_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 	mesh = a_mesh
+	var trimesh_collisions = a_mesh.create_trimesh_shape()
+	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
+	collisions.shape = trimesh_collisions
 
 func create_block(pos):
 	if is_air(pos + Vector3(0, 1, 0)):

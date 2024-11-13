@@ -11,7 +11,14 @@ var random
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+		noise = FastNoiseLite.new()
+		noise.noise_type = FastNoiseLite.TYPE_PERLIN
+		noise.frequency = 0.01
+		random = RandomNumberGenerator.new()
+		noise.seed = random.randi()
+		for child in get_children():
+			child.queue_free()
+		generate_world()
 
 func _process(_delta: float) -> void:
 	if update_mesh:

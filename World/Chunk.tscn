@@ -9,3 +9,7 @@ albedo_texture = ExtResource("1_dsekm")
 [node name="Chunk" type="MeshInstance3D"]
 material_override = SubResource("StandardMaterial3D_tvn3i")
 script = ExtResource("2_3l77v")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]

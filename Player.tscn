@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://bf00mwck5gp0h"]
+
+[ext_resource type="Script" path="res://Player.gd" id="1_ye7mv"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_2i0el"]
+height = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_gvbhx"]
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_ye7mv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CylinderShape3D_2i0el")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_gvbhx")
+
+[node name="Neck" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Camera" type="Camera3D" parent="Neck"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
