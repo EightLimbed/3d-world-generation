@@ -1,45 +1,50 @@
-@tool
+# for breaking and placing blocks, keep every rendered chunks blocks, and if you change something in it, make it override that chunks blocks, and keep that chunks blocks, so instead of regenerating it, just apply changes. discard other chunks blocks 
 extends Node3D
-@export var update_mesh : bool
-@export var chunk_size : int = 16
-@export var world_size : int = 4
+var chunk_size : int = 16
+var render_distance : int = 8
 var chunk = preload("res://World/Chunk.tscn")
-var stored_chunks
+var rendered_chunks : Array[Vector3]
 
-var noise
-var random
+@onready var noise = FastNoiseLite.new()
+@onready var random = RandomNumberGenerator.new()
+@onready var player = get_parent().get_child(1)
+@onready var chunk_container = $ChunkContainer
+@onready var label = $CanvasLayer/Label
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-		noise = FastNoiseLite.new()
 		noise.noise_type = FastNoiseLite.TYPE_PERLIN
 		noise.frequency = 0.01
-		random = RandomNumberGenerator.new()
 		noise.seed = random.randi()
-		for child in get_children():
+		for child in $ChunkContainer.get_children():
 			child.queue_free()
-		generate_world()
+		generate_world(pos_to_chunk(player.global_position))
 
 func _process(_delta: float) -> void:
-	if update_mesh:
-		noise = FastNoiseLite.new()
-		noise.noise_type = FastNoiseLite.TYPE_PERLIN
-		noise.frequency = 0.01
-		random = RandomNumberGenerator.new()
-		noise.seed = random.randi()
-		for child in get_children():
+	label.text = "total chunks:" + str(chunk_container.get_child_count())
+	generate_world(pos_to_chunk(player.global_position))
+
+func pos_to_chunk(pos):
+	return round(pos/chunk_size)
+
+func generate_world(pos : Vector3):
+	var keep = []
+	for x in range(render_distance):
+		for y in range(render_distance):
+			for z in range(render_distance):
+				var updated_pos = ((pos+Vector3(x,y,z)-Vector3(render_distance,render_distance,render_distance)/2)*chunk_size)
+				if not rendered_chunks.has(updated_pos):
+					create_chunk(updated_pos)
+				keep.append(updated_pos)
+	for child in chunk_container.get_children():
+		if not keep.has(child.chunk_pos):
+			rendered_chunks.erase(child.chunk_pos)
 			child.queue_free()
-		generate_world()
-		update_mesh = false
 
-func generate_world():
-	for x in range(world_size):
-		for y in range(world_size):
-			for z in range(world_size):
-				create_chunk(x*chunk_size,y*chunk_size,z*chunk_size)
-
-func create_chunk(x,y,z):
+func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
-	instance.position = Vector3(x,y,z)
-	add_child(instance)
+	instance.position = pos
+	chunk_container.add_child(instance)
+	instance.chunk_pos = pos
 	instance.generate()
+	rendered_chunks.append(pos)

@@ -1,10 +1,10 @@
 [gd_scene load_steps=4 format=3 uid="uid://rqvooj081igb"]
 
-[ext_resource type="Texture2D" uid="uid://c801xdd8acfr6" path="res://icon.svg" id="1_dsekm"]
+[ext_resource type="Texture2D" uid="uid://dx0onmen2vdyq" path="res://Cobblesone.jpg" id="1_4n176"]
 [ext_resource type="Script" path="res://World/Chunk.gd" id="2_3l77v"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tvn3i"]
-albedo_texture = ExtResource("1_dsekm")
+albedo_texture = ExtResource("1_4n176")
 
 [node name="Chunk" type="MeshInstance3D"]
 material_override = SubResource("StandardMaterial3D_tvn3i")

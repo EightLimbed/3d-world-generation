@@ -1,11 +1,9 @@
-@tool
 extends MeshInstance3D
 
-var noise
-var random
 
 enum BlockTypes {Air, Dirt}
 
+var chunk_pos : Vector3
 var parent
 
 var a_mesh = ArrayMesh.new()
@@ -15,7 +13,7 @@ var uvs = PackedVector2Array()
 
 var face_count
 #groups texture atlas is split into
-var tex_div = 0.25
+var tex_div = 0.5
 
 var blocks = []
 
@@ -39,9 +37,9 @@ func get_block(pos : Vector3):
 		return BlockTypes.Dirt
 
 func generate_chunk():
-	parent = get_parent()
+	parent = get_parent().get_parent()
 	blocks = []
-	blocks.resize(get_parent().chunk_size)
+	blocks.resize(parent.chunk_size)
 	for x in range(parent.chunk_size):
 		blocks[x] = []
 		for y in range(parent.chunk_size):
