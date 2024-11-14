@@ -1,7 +1,7 @@
 # for breaking and placing blocks, keep every rendered chunks blocks, and if you change something in it, make it override that chunks blocks, and keep that chunks blocks, so instead of regenerating it, just apply changes. discard other chunks blocks 
 extends Node3D
 var chunk_size : int = 16
-var render_distance : int = 8
+var render_distance : int = 2
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
 

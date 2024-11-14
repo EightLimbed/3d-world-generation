@@ -73,15 +73,35 @@ func generate_mesh():
 	collisions.shape = trimesh_collisions
 
 func create_block(pos):
+	var up: bool = false
+	var down : bool = false
+	var left : bool = false
+	var right : bool = false
+	var front : bool = false
+	var back : bool = false
 	if is_air(pos + Vector3(0, 1, 0)):
+		up = true
+	if is_air(pos + Vector3(0, -1, 0)):
+		down = true
+	if is_air(pos + Vector3(0, 0, 1)):
+		front = true
+	if is_air(pos + Vector3(0, 0, -1)):
+		back = true
+	if is_air(pos + Vector3(1, 0, 0)):
+		right = true
+	if is_air(pos + Vector3(-1, 0, 0)):
+		left = true
+	#above
+	if up:
 		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5,  0.5))
 		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
 		update_indices()
 		add_uv(0,0)
-
-	if is_air(pos + Vector3(1, 0, 0)):
+	
+	#right
+	if right:
 		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5,-0.5))
@@ -89,7 +109,8 @@ func create_block(pos):
 		update_indices()
 		add_uv(3,0)
 
-	if is_air(pos + Vector3(0, 0, 1)):
+	#front
+	if front:
 		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5,0.5))
@@ -97,7 +118,8 @@ func create_block(pos):
 		update_indices()
 		add_uv(0,1)
 
-	if is_air(pos + Vector3(-1, 0, 0)):
+	#left
+	if left:
 		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
@@ -105,7 +127,8 @@ func create_block(pos):
 		update_indices()
 		add_uv(1,1)
 
-	if is_air(pos + Vector3(0, 0, -1)):
+	#back
+	if back:
 		vertices.append(pos + Vector3( 0.5,  0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5,  0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
@@ -113,7 +136,8 @@ func create_block(pos):
 		update_indices()
 		add_uv(2,0)
 
-	if is_air(pos + Vector3(0, -1, 0)):
+	#down
+	if down:
 		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5, -0.5))
