@@ -4,7 +4,7 @@ extends MeshInstance3D
 enum BlockTypes {Air, Dirt}
 
 var chunk_pos : Vector3
-var parent
+@onready var parent = get_parent().get_parent()
 
 var a_mesh = ArrayMesh.new()
 var vertices = PackedVector3Array()
@@ -23,7 +23,7 @@ func _ready() -> void:
 
 func generate():
 	generate_chunk()
-	generate_mesh()
+	create_mesh()
 
 func delete():
 	queue_free()
@@ -37,7 +37,6 @@ func get_block(pos : Vector3):
 		return BlockTypes.Dirt
 
 func generate_chunk():
-	parent = get_parent().get_parent()
 	blocks = []
 	blocks.resize(parent.chunk_size)
 	for x in range(parent.chunk_size):
@@ -47,18 +46,14 @@ func generate_chunk():
 			for z in range(parent.chunk_size):
 				blocks[x][y].append(get_block(Vector3(x,y,z)))
 
-func generate_mesh():
+func create_mesh():
 	mesh = ArrayMesh.new()
 	a_mesh = ArrayMesh.new()
 	vertices = PackedVector3Array()
 	indices = PackedInt32Array()
 	uvs = PackedVector2Array()
 	face_count = 0
-	for x in range(parent.chunk_size):
-		for y in range(parent.chunk_size):
-			for z in range(parent.chunk_size):
-				if (blocks[x][y][z] == BlockTypes.Dirt):
-					create_block(Vector3(x, y, z))
+	generate_mesh_singular()
 	#smooth_mesh()
 	if face_count > 0:
 		var array = []
@@ -72,36 +67,23 @@ func generate_mesh():
 	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 	collisions.shape = trimesh_collisions
 
+func generate_mesh_singular():
+	for x in range(parent.chunk_size):
+		for y in range(parent.chunk_size):
+			for z in range(parent.chunk_size):
+				if (blocks[x][y][z] == BlockTypes.Dirt):
+					create_block(Vector3(x, y, z))
+
 func create_block(pos):
-	var up: bool = false
-	var down : bool = false
-	var left : bool = false
-	var right : bool = false
-	var front : bool = false
-	var back : bool = false
 	if is_air(pos + Vector3(0, 1, 0)):
-		up = true
-	if is_air(pos + Vector3(0, -1, 0)):
-		down = true
-	if is_air(pos + Vector3(0, 0, 1)):
-		front = true
-	if is_air(pos + Vector3(0, 0, -1)):
-		back = true
-	if is_air(pos + Vector3(1, 0, 0)):
-		right = true
-	if is_air(pos + Vector3(-1, 0, 0)):
-		left = true
-	#above
-	if up:
 		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5,  0.5))
 		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
 		update_indices()
 		add_uv(0,0)
-	
-	#right
-	if right:
+
+	if is_air(pos + Vector3(1, 0, 0)):
 		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5,-0.5))
@@ -109,8 +91,7 @@ func create_block(pos):
 		update_indices()
 		add_uv(3,0)
 
-	#front
-	if front:
+	if is_air(pos + Vector3(0, 0, 1)):
 		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5,0.5))
@@ -118,8 +99,7 @@ func create_block(pos):
 		update_indices()
 		add_uv(0,1)
 
-	#left
-	if left:
+	if is_air(pos + Vector3(-1, 0, 0)):
 		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
@@ -127,8 +107,7 @@ func create_block(pos):
 		update_indices()
 		add_uv(1,1)
 
-	#back
-	if back:
+	if is_air(pos + Vector3(0, 0, -1)):
 		vertices.append(pos + Vector3( 0.5,  0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5,  0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
@@ -136,8 +115,7 @@ func create_block(pos):
 		update_indices()
 		add_uv(2,0)
 
-	#down
-	if down:
+	if is_air(pos + Vector3(0, -1, 0)):
 		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5, 0.5))
 		vertices.append(pos + Vector3( 0.5, -0.5, -0.5))
