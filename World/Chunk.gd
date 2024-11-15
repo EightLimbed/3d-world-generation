@@ -1,6 +1,5 @@
 extends MeshInstance3D
 
-
 enum BlockTypes {Air, Dirt}
 
 var chunk_pos : Vector3
@@ -11,7 +10,7 @@ var vertices = PackedVector3Array()
 var indices = PackedInt32Array()
 var uvs = PackedVector2Array()
 
-var face_count
+var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = 0.5
 
@@ -53,7 +52,7 @@ func create_mesh():
 	indices = PackedInt32Array()
 	uvs = PackedVector2Array()
 	face_count = 0
-	generate_mesh_singular()
+	generate_mesh_runs()
 	#smooth_mesh()
 	if face_count > 0:
 		var array = []
@@ -66,6 +65,42 @@ func create_mesh():
 	var trimesh_collisions = a_mesh.create_trimesh_shape()
 	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 	collisions.shape = trimesh_collisions
+
+func generate_mesh_runs():
+	var from = null
+	var to = null
+	for x in range(parent.chunk_size):
+		for y in range(parent.chunk_size):
+			for z in range(parent.chunk_size):
+				if (blocks[x][y][z] == BlockTypes.Dirt):
+					if from is Vector3:
+						if blocks[x][y].size()>z+1:
+							if blocks[x][y][z+1] == BlockTypes.Air:
+								to = Vector3(x,y,z)
+								create_run(from,to)
+								from = null
+								to = null
+					else:
+						from = Vector3(x,y,z)
+
+func create_run(to : Vector3, from : Vector3):
+	#left
+	make_quad(from, Vector3(from.x,to.y,from.x), Vector3(from.x,to.y,to.z), Vector3(from.x,from.y,to.z))
+	#right
+	make_quad(Vector3(to.x,from.y,to.z), to, Vector3(to.x,to.y,from.z), Vector3(to.x,from.y,from.z))
+	#down
+	make_quad(Vector3(to.x,from.y,from.z), from, Vector3(from.x,from.y,to.z), Vector3(to.x,from.y,to.z))
+	#up
+	make_quad(to, Vector3(from.x,to.y,to.z), Vector3(from.x,to.y,from.z), Vector3(from))
+	#back
+	make_quad(Vector3(to.x,from.y,from.z), Vector3(to.x,to.y,from.z), Vector3(from.x,to.y,from.z), from)
+	#front
+	make_quad(Vector3(from.x,from.y,to.z), Vector3(from.x,to.y,to.z), to, Vector3(to.x,from.y,to.z))
+
+func make_quad(a,b,c,d):
+	var length = len(vertices)
+	indices.append_array([length, length+1, length+2, length, length+2, length+3])
+	vertices.append_array([a,b,c,d])
 
 func generate_mesh_singular():
 	for x in range(parent.chunk_size):

@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://bf00mwck5gp0h" path="res://Player.tscn" id="2_61grf"]
 
 [node name="Game" type="Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0328617, 1.90735e-06, -0.0508919)
 
 [node name="World" parent="." instance=ExtResource("1_fionh")]
 
