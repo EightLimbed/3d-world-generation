@@ -1,4 +1,7 @@
+@tool
 extends MeshInstance3D
+
+@export var generating : bool = false
 
 enum BlockTypes {Air, Dirt}
 
@@ -19,6 +22,14 @@ var blocks = []
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
+
+func _process(delta: float) -> void:
+	if generating:
+		#generate_chunk()
+		create_mesh()
+		print(vertices)
+		print(indices)
+		generating = false
 
 func generate():
 	generate_chunk()
@@ -52,8 +63,7 @@ func create_mesh():
 	indices = PackedInt32Array()
 	uvs = PackedVector2Array()
 	face_count = 0
-	generate_mesh_runs()
-	#smooth_mesh()
+	create_run(Vector3(1,0,2),Vector3(2,5,7))
 	if face_count > 0:
 		var array = []
 		array.resize(Mesh.ARRAY_MAX)
@@ -77,7 +87,7 @@ func generate_mesh_runs():
 						if blocks[x][y].size()>z+1:
 							if blocks[x][y][z+1] == BlockTypes.Air:
 								to = Vector3(x,y,z)
-								create_run(from,to)
+								create_run(to,from)
 								from = null
 								to = null
 					else:
@@ -91,14 +101,14 @@ func create_run(to : Vector3, from : Vector3):
 	#down
 	make_quad(Vector3(to.x,from.y,from.z), from, Vector3(from.x,from.y,to.z), Vector3(to.x,from.y,to.z))
 	#up
-	make_quad(to, Vector3(from.x,to.y,to.z), Vector3(from.x,to.y,from.z), Vector3(from))
+	make_quad(to, Vector3(from.x,to.y,to.z), Vector3(from.x,to.y,from.z), from)
 	#back
 	make_quad(Vector3(to.x,from.y,from.z), Vector3(to.x,to.y,from.z), Vector3(from.x,to.y,from.z), from)
 	#front
 	make_quad(Vector3(from.x,from.y,to.z), Vector3(from.x,to.y,to.z), to, Vector3(to.x,from.y,to.z))
 
 func make_quad(a,b,c,d):
-	var length = len(vertices)
+	var length = vertices.size()
 	indices.append_array([length, length+1, length+2, length, length+2, length+3])
 	vertices.append_array([a,b,c,d])
 

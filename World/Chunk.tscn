@@ -1,9 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://rqvooj081igb"]
+[gd_scene load_steps=3 format=3 uid="uid://rqvooj081igb"]
 
 [ext_resource type="Script" path="res://World/Chunk.gd" id="2_3l77v"]
 
+[sub_resource type="ArrayMesh" id="ArrayMesh_0wl4h"]
+
 [node name="Chunk" type="MeshInstance3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.76728e-05, 0, 7.3567e-05)
+mesh = SubResource("ArrayMesh_0wl4h")
 script = ExtResource("2_3l77v")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
