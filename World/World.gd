@@ -18,10 +18,9 @@ func _ready() -> void:
 		noise.seed = random.randi()
 		for child in $ChunkContainer.get_children():
 			child.queue_free()
-		generate_world(pos_to_chunk(player.global_position))
 
 func _process(_delta: float) -> void:
-	label.text = "total chunks:" + str(chunk_container.get_child_count())
+	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())
 	generate_world(pos_to_chunk(player.global_position))
 
 func pos_to_chunk(pos):
@@ -43,6 +42,7 @@ func generate_world(pos : Vector3):
 
 func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
+	#instance.block_subdivisions = int(pos.distance_to(player.global_position)/chunk_size+1)
 	instance.position = pos
 	chunk_container.add_child(instance)
 	instance.chunk_pos = pos

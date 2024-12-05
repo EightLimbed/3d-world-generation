@@ -1,7 +1,4 @@
-@tool
 extends MeshInstance3D
-
-@export var generating : bool = false
 
 enum BlockTypes {Air, Dirt}
 
@@ -13,6 +10,7 @@ var vertices = PackedVector3Array()
 var indices = PackedInt32Array()
 var uvs = PackedVector2Array()
 
+var block_subdivisions : int = 1
 var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = 0.5
@@ -22,14 +20,6 @@ var blocks = []
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
-
-func _process(delta: float) -> void:
-	if generating:
-		#generate_chunk()
-		create_mesh()
-		print(vertices)
-		print(indices)
-		generating = false
 
 func generate():
 	generate_chunk()
@@ -63,7 +53,7 @@ func create_mesh():
 	indices = PackedInt32Array()
 	uvs = PackedVector2Array()
 	face_count = 0
-	create_run(Vector3(1,0,2),Vector3(2,5,7))
+	generate_mesh_singular(block_subdivisions)
 	if face_count > 0:
 		var array = []
 		array.resize(Mesh.ARRAY_MAX)
@@ -76,97 +66,61 @@ func create_mesh():
 	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 	collisions.shape = trimesh_collisions
 
-func generate_mesh_runs():
-	var from = null
-	var to = null
-	for x in range(parent.chunk_size):
-		for y in range(parent.chunk_size):
-			for z in range(parent.chunk_size):
-				if (blocks[x][y][z] == BlockTypes.Dirt):
-					if from is Vector3:
-						if blocks[x][y].size()>z+1:
-							if blocks[x][y][z+1] == BlockTypes.Air:
-								to = Vector3(x,y,z)
-								create_run(to,from)
-								from = null
-								to = null
-					else:
-						from = Vector3(x,y,z)
+func generate_mesh_singular(block_size : int = 1):
+	for x in range(parent.chunk_size/block_size):
+		for y in range(parent.chunk_size/block_size):
+			for z in range(parent.chunk_size/block_size):
+				if (blocks[block_size*x][block_size*y][block_size*z] == BlockTypes.Dirt):
+					create_block(block_size*Vector3(x, y, z), block_size)
 
-func create_run(to : Vector3, from : Vector3):
-	#left
-	make_quad(from, Vector3(from.x,to.y,from.x), Vector3(from.x,to.y,to.z), Vector3(from.x,from.y,to.z))
-	#right
-	make_quad(Vector3(to.x,from.y,to.z), to, Vector3(to.x,to.y,from.z), Vector3(to.x,from.y,from.z))
-	#down
-	make_quad(Vector3(to.x,from.y,from.z), from, Vector3(from.x,from.y,to.z), Vector3(to.x,from.y,to.z))
-	#up
-	make_quad(to, Vector3(from.x,to.y,to.z), Vector3(from.x,to.y,from.z), from)
-	#back
-	make_quad(Vector3(to.x,from.y,from.z), Vector3(to.x,to.y,from.z), Vector3(from.x,to.y,from.z), from)
-	#front
-	make_quad(Vector3(from.x,from.y,to.z), Vector3(from.x,to.y,to.z), to, Vector3(to.x,from.y,to.z))
-
-func make_quad(a,b,c,d):
-	var length = vertices.size()
-	indices.append_array([length, length+1, length+2, length, length+2, length+3])
-	vertices.append_array([a,b,c,d])
-
-func generate_mesh_singular():
-	for x in range(parent.chunk_size):
-		for y in range(parent.chunk_size):
-			for z in range(parent.chunk_size):
-				if (blocks[x][y][z] == BlockTypes.Dirt):
-					create_block(Vector3(x, y, z))
-
-func create_block(pos):
-	if is_air(pos + Vector3(0, 1, 0)):
-		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
-		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
-		vertices.append(pos + Vector3( 0.5, 0.5,  0.5))
-		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
+func create_block(pos : Vector3, size : int):
+	if is_air(pos + Vector3(0, size, 0)):
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size,  -0.5+size))
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
 		update_indices()
 		add_uv(0,0)
 
-	if is_air(pos + Vector3(1, 0, 0)):
-		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
-		vertices.append(pos + Vector3( 0.5, 0.5, -0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5,-0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5,  0.5))
+	if is_air(pos + Vector3(size, 0, 0)):
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5+size))
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
+		vertices.append(pos + Vector3(-0.5+size, -0.5,-0.5))
+		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
 		update_indices()
-		add_uv(3,0)
+		add_uv(3-size,0)
 
-	if is_air(pos + Vector3(0, 0, 1)):
-		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
-		vertices.append(pos + Vector3( 0.5, 0.5, 0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5,0.5))
-		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
+	if is_air(pos + Vector3(0, 0, size)):
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5+size))
+		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
+		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		update_indices()
-		add_uv(0,1)
+		add_uv(0,1-size)
 
-	if is_air(pos + Vector3(-1, 0, 0)):
-		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
-		vertices.append(pos + Vector3(-0.5, 0.5,  0.5))
-		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
+	if is_air(pos + Vector3(-size, 0, 0)):
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
+		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(1,1)
+		add_uv(1-size,1-size)
 
-	if is_air(pos + Vector3(0, 0, -1)):
-		vertices.append(pos + Vector3( 0.5,  0.5, -0.5))
-		vertices.append(pos + Vector3(-0.5,  0.5, -0.5))
+	if is_air(pos + Vector3(0, 0, -size)):
+		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
+		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5, -0.5))
+		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		update_indices()
-		add_uv(2,0)
+		add_uv(2-size,0)
 
-	if is_air(pos + Vector3(0, -1, 0)):
-		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5, 0.5))
-		vertices.append(pos + Vector3( 0.5, -0.5, -0.5))
+	if is_air(pos + Vector3(0, -size, 0)):
+		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
+		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
+		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(1,0)
+		add_uv(1-size,0)
 
 func add_uv(x, y):
 	uvs.append(Vector2(tex_div * x, tex_div * y))
