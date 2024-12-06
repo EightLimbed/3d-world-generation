@@ -3,6 +3,7 @@ extends MeshInstance3D
 enum BlockTypes {Air, Dirt}
 
 var chunk_pos : Vector3
+var inner : bool
 @onready var parent = get_parent().get_parent()
 
 var a_mesh = ArrayMesh.new()
@@ -62,9 +63,10 @@ func create_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 	mesh = a_mesh
-	var trimesh_collisions = a_mesh.create_trimesh_shape()
-	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
-	collisions.shape = trimesh_collisions
+	if inner:
+		var trimesh_collisions = a_mesh.create_trimesh_shape()
+		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
+		collisions.shape = trimesh_collisions
 
 func generate_mesh_singular(block_size : int = 1):
 	for x in range(parent.chunk_size/block_size):
