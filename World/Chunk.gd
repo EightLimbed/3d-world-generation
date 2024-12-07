@@ -23,6 +23,10 @@ func _ready() -> void:
 	pass
 
 func generate():
+	if inner:
+		block_subdivisions = 1
+	else:
+		block_subdivisions = 3
 	generate_chunk()
 	create_mesh()
 
@@ -46,6 +50,10 @@ func generate_chunk():
 			blocks[x].append([])
 			for z in range(parent.chunk_size):
 				blocks[x][y].append(get_block(Vector3(x,y,z)))
+				#if y == 4 and z > 1 and x > 1:
+					#blocks[x][y].append(BlockTypes.Dirt)
+				#else:
+					#blocks[x][y].append(BlockTypes.Air)
 
 func create_mesh():
 	mesh = ArrayMesh.new()

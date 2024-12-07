@@ -1,8 +1,8 @@
 # for breaking and placing blocks, keep every rendered chunks blocks, and if you change something in it, make it override that chunks blocks, and keep that chunks blocks, so instead of regenerating it, just apply changes. discard other chunks blocks 
 extends Node3D
-var chunk_size : int = 4
-var render_distance : int = 2
-var render_distance_far : int = 8
+@export var chunk_size : int = 6
+@export var render_distance : int = 3
+@export var render_distance_far : int = 9
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
 
@@ -18,7 +18,7 @@ func _ready() -> void:
 		noise.frequency = 0.01
 		noise.seed = random.randi()
 		for child in $ChunkContainer.get_children():
-			child.queue_free()
+			child.queue_free() 
 
 func _process(_delta: float) -> void:
 	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())
@@ -33,9 +33,10 @@ func generate_world(pos : Vector3):
 	for x in range(render_distance_far):
 		for y in range(render_distance_far):
 			for z in range(render_distance_far):
-				var updated_pos = ((pos+Vector3(x,y,z)-Vector3(render_distance_far,render_distance_far,render_distance_far)/2))
-				var distance = vector_dist(Vector3(x,y,z))
-				if distance > render_distance:
+				#change center distance to work
+				var center_distance = Vector3(render_distance_far,render_distance_far,render_distance_far)/2
+				var updated_pos = pos+Vector3(x,y,z)-center_distance
+				if not middle_of(Vector3(x,y,z), render_distance, render_distance_far):
 					if not rendered_chunks.has(updated_pos):
 						create_chunk(updated_pos, false)
 					outer.append(updated_pos)
@@ -54,20 +55,14 @@ func generate_world(pos : Vector3):
 func create_chunk(pos : Vector3, inner):
 	var instance = chunk.instantiate()
 	instance.inner = inner
-	if inner:
-		instance.block_subdivisions = 1
-	else:
-		instance.block_subdivisions = 2
 	instance.position = pos*chunk_size
 	chunk_container.add_child(instance)
 	instance.chunk_pos = pos
 	instance.generate()
 	rendered_chunks.append(pos)
 
-func vector_dist(vec : Vector3):
-	var dist = vec.x
-	if vec.y > dist:
-		dist = vec.y
-	if vec.z > dist:
-		dist = vec.z
-	return abs(dist)
+func middle_of(vec : Vector3, inner_size, outer_size):
+	var distance1 = (outer_size-inner_size)/2
+	var distance2 = outer_size-distance1
+	if vec.x >= distance1 and vec.x < distance2 and vec.y >= distance1 and vec.y < distance2 and vec.z >= distance1 and vec.z < distance2:
+		return true

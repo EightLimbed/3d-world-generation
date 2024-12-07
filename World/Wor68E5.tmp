@@ -4,9 +4,6 @@
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
-chunk_size = 12
-render_distance = 2
-render_distance_far = 6
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
