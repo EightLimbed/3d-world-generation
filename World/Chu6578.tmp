@@ -1,16 +1,17 @@
 [gd_scene load_steps=5 format=3 uid="uid://rqvooj081igb"]
 
-[ext_resource type="Texture2D" uid="uid://bevcr7egg06s4" path="res://TownGrass.png" id="1_sjvyo"]
+[ext_resource type="Texture2D" uid="uid://dx0onmen2vdyq" path="res://Cobblesone.jpg" id="1_7083g"]
 [ext_resource type="Script" path="res://World/Chunk.gd" id="2_3l77v"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ihj3u"]
-albedo_texture = ExtResource("1_sjvyo")
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f62gt"]
+albedo_texture = ExtResource("1_7083g")
+roughness_texture = ExtResource("1_7083g")
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_2bg7a"]
 
 [node name="Chunk" type="MeshInstance3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.76728e-05, 0, 7.3567e-05)
-material_override = SubResource("StandardMaterial3D_ihj3u")
+material_override = SubResource("StandardMaterial3D_f62gt")
 mesh = SubResource("ArrayMesh_2bg7a")
 script = ExtResource("2_3l77v")
 

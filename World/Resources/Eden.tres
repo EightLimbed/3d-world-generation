@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="World" load_steps=2 format=3 uid="uid://sm8ejoeec2t0"]
+
+[ext_resource type="Script" path="res://World/Resources/WorldProfile.gd" id="1_8kq02"]
+
+[resource]
+script = ExtResource("1_8kq02")
+seeded = 1
+chunks = Array[Array]([])
+chunk_positions = Array[Vector3]([])

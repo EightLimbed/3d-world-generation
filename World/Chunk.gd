@@ -2,8 +2,7 @@ extends MeshInstance3D
 
 enum BlockTypes {Air, Dirt}
 
-var chunk_pos : Vector3
-var inner : bool
+var layer : int
 @onready var parent = get_parent().get_parent()
 
 var a_mesh = ArrayMesh.new()
@@ -23,15 +22,12 @@ func _ready() -> void:
 	pass
 
 func generate():
-	if inner:
+	if layer == 1:
 		block_subdivisions = 1
-	else:
-		block_subdivisions = 3
+	elif layer == 2:
+		block_subdivisions = 2
 	generate_chunk()
 	create_mesh()
-
-func delete():
-	queue_free()
 
 #noise parameters
 func get_block(pos : Vector3):
@@ -42,18 +38,28 @@ func get_block(pos : Vector3):
 		return BlockTypes.Dirt
 
 func generate_chunk():
-	blocks = []
-	blocks.resize(parent.chunk_size)
-	for x in range(parent.chunk_size):
-		blocks[x] = []
-		for y in range(parent.chunk_size):
-			blocks[x].append([])
-			for z in range(parent.chunk_size):
-				blocks[x][y].append(get_block(Vector3(x,y,z)))
-				#if y == 4 and z > 1 and x > 1:
-					#blocks[x][y].append(BlockTypes.Dirt)
-				#else:
-					#blocks[x][y].append(BlockTypes.Air)
+	if not chunk_generated():
+		blocks = []
+		blocks.resize(parent.chunk_size)
+		for x in range(parent.chunk_size):
+			blocks[x] = []
+			for y in range(parent.chunk_size):
+				blocks[x].append([])
+				for z in range(parent.chunk_size):
+					blocks[x][y].append(get_block(Vector3(x,y,z)))
+					#if y == 4 and z > 1 and x > 1:
+						#blocks[x][y].append(BlockTypes.Dirt)
+					#else:
+						#blocks[x][y].append(BlockTypes.Air)
+		parent.world.chunk_positions.append(position)
+		parent.world.chunks.append(blocks)
+
+func chunk_generated():
+	for i in parent.world.chunk_positions.size()-1:
+		if parent.world.chunk_positions[i] == position:
+			blocks = parent.world.chunks[i]
+			return true
+	return false
 
 func create_mesh():
 	mesh = ArrayMesh.new()
@@ -71,7 +77,7 @@ func create_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 	mesh = a_mesh
-	if inner:
+	if layer == 1:
 		var trimesh_collisions = a_mesh.create_trimesh_shape()
 		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 		collisions.shape = trimesh_collisions
@@ -98,7 +104,7 @@ func create_block(pos : Vector3, size : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5,-0.5))
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
 		update_indices()
-		add_uv(3-size,0)
+		add_uv(3,0)
 
 	if is_air(pos + Vector3(0, 0, size)):
 		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
@@ -106,7 +112,7 @@ func create_block(pos : Vector3, size : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		update_indices()
-		add_uv(0,1-size)
+		add_uv(0,1)
 
 	if is_air(pos + Vector3(-size, 0, 0)):
 		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
@@ -114,7 +120,7 @@ func create_block(pos : Vector3, size : int):
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(1-size,1-size)
+		add_uv(1,1)
 
 	if is_air(pos + Vector3(0, 0, -size)):
 		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
@@ -122,7 +128,7 @@ func create_block(pos : Vector3, size : int):
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		update_indices()
-		add_uv(2-size,0)
+		add_uv(2,0)
 
 	if is_air(pos + Vector3(0, -size, 0)):
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
@@ -130,7 +136,7 @@ func create_block(pos : Vector3, size : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(1-size,0)
+		add_uv(1,0)
 
 func add_uv(x, y):
 	uvs.append(Vector2(tex_div * x, tex_div * y))
