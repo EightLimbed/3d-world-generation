@@ -70,4 +70,4 @@ func middle_of(vec : Vector3, inner_size, outer_size):
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("saved")
-		ResourceSaver.save(world, "res://World/Resources/Eden.tres")
+		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")

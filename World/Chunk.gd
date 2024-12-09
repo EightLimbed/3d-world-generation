@@ -17,10 +17,6 @@ var tex_div = 0.5
 
 var blocks = []
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass
-
 func generate():
 	if layer == 1:
 		block_subdivisions = 1
@@ -162,7 +158,3 @@ func is_air(pos):
 		return true
 	else:
 		return false
-
-func smooth_mesh():
-	for i in vertices.size()-1:
-		vertices[i] = ((vertices[i+1]+vertices[i-1])+8*vertices[i])/10
