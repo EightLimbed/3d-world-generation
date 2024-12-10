@@ -28,22 +28,22 @@ func generate():
 #noise parameters
 func get_block(pos : Vector3):
 	var cn = (parent.noise.get_noise_3dv(pos+position))*10
-	if cn < -0.1:
+	if cn < 0:
 		return 0
-	elif cn < 0:
-		return 3
+	elif cn < 0.1:
+		return 0
 	else:
 		return 6
 
 func generate_chunk():
 	if not chunk_generated():
 		blocks = []
-		blocks.resize(parent.chunk_size)
-		for x in range(parent.chunk_size):
+		blocks.resize(parent.chunk_size+2)
+		for x in range(parent.chunk_size+2):
 			blocks[x] = []
-			for y in range(parent.chunk_size):
+			for y in range(parent.chunk_size+2):
 				blocks[x].append([])
-				for z in range(parent.chunk_size):
+				for z in range(parent.chunk_size+2):
 					blocks[x][y].append(get_block(Vector3(x,y,z)))
 		parent.world.chunk_positions.append(position)
 		parent.world.chunks.append(blocks)
@@ -80,9 +80,9 @@ func generate_mesh_singular(block_size : int = 1):
 	for x in range(parent.chunk_size/block_size):
 		for y in range(parent.chunk_size/block_size):
 			for z in range(parent.chunk_size/block_size):
-				var block = blocks[block_size*x][block_size*y][block_size*z]
+				var block = blocks[block_size*x+1][block_size*y+1][block_size*z+1]
 				if block != 6:
-					create_block(block_size*Vector3(x, y, z), block_size, block)
+					create_block(block_size*Vector3(x, y, z)+Vector3(1,1,1), block_size, block)
 
 func create_block(pos : Vector3, size : int, type : int):
 	#top
@@ -155,15 +155,10 @@ func update_indices():
 	face_count += 1
 
 func not_transparent(new_pos, type):
-	if new_pos.x < 0 or new_pos.y < 0 or new_pos.z < 0:
-		return true
-	elif new_pos.x >= parent.chunk_size or new_pos.y >= parent.chunk_size or new_pos.z >= parent.chunk_size:
+	var new_value = blocks[new_pos.x][new_pos.y][new_pos.z]
+	if type == new_value:
+		return false
+	elif transparent[new_value]:
 		return true
 	else:
-		var new_value = blocks[new_pos.x][new_pos.y][new_pos.z]
-		if type == new_value:
-			return false
-		elif transparent[new_value]:
-			return true
-		else:
-			return false
+		return false
