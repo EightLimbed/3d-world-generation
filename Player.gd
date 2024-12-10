@@ -5,7 +5,7 @@ const SPEED = 10.0
 const JUMP_VELOCITY = 4.5
 
 # Get the gravity from the project settings to be synced with RigidDynamicBody nodes.
-var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity: int = 9
 @onready var neck := $Neck
 @onready var camera := $Neck/Camera
 @onready var collision = $CollisionShape3D
