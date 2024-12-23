@@ -31,7 +31,7 @@ func get_block(pos : Vector3):
 	if cn < 0:
 		return 0
 	elif cn < 0.1:
-		return 0
+		return 3
 	else:
 		return 6
 
