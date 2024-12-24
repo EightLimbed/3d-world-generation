@@ -12,7 +12,7 @@ var block_subdivisions : int = 1
 var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = 0.16666
-#list of transparent blocks
+#list of transparent blocks, index is block id, boolean is whether or not it is transparent (air is always at the end)
 const transparent : Array = [false, false, false, true, false, true, true]
 
 var blocks = []
@@ -25,16 +25,6 @@ func generate():
 	generate_chunk()
 	create_mesh()
 
-#noise parameters
-func get_block(pos : Vector3):
-	var cn = (parent.noise.get_noise_3dv(pos+position))*10
-	if cn < 0:
-		return 0
-	elif cn < 0.1:
-		return 3
-	else:
-		return 6
-
 func generate_chunk():
 	if not chunk_generated():
 		blocks = []
@@ -44,7 +34,8 @@ func generate_chunk():
 			for y in range(parent.chunk_size+2):
 				blocks[x].append([])
 				for z in range(parent.chunk_size+2):
-					blocks[x][y].append(get_block(Vector3(x,y,z)))
+					blocks[x][y].append(parent.get_block(Vector3(x,y,z)+position))
+		#add structures, like trees
 		parent.world.chunk_positions.append(position)
 		parent.world.chunks.append(blocks)
 

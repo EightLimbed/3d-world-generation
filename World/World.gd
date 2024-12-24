@@ -8,22 +8,43 @@ var world = preload("res://World/Resources/Eden.tres")
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
 
-@onready var noise = FastNoiseLite.new()
+@onready var hill_noise = FastNoiseLite.new()
+@onready var cave_noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
 @onready var chunk_container = $ChunkContainer
 @onready var label = $CanvasLayer/Label
 
 func _ready() -> void:
-		noise.noise_type = FastNoiseLite.TYPE_PERLIN
-		noise.frequency = 0.01
-		noise.seed = world.seeded
+		hill_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+		hill_noise.frequency = 0.005
+		hill_noise.seed = world.seeded
+		cave_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+		cave_noise.frequency = 0.05
+		cave_noise.seed = world.seeded
 		for child in $ChunkContainer.get_children():
 			child.queue_free() 
 
+#noise parameters
+func get_block(pos : Vector3):
+	var hills = hill_noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
+	var peaks = hill_noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
+	var caves = cave_noise.get_noise_3dv(pos)*10
+	var block : int = 6
+	#stone
+	if hills*abs(hills) >= pos.y:
+		block = 1
+	#grass
+	elif hills*abs(hills) >= pos.y-1:
+		block = 0
+	#caves
+	if caves > 30/abs(min(pos.y,1)):
+		block = 6
+	return block
+
 func _process(_delta: float) -> void:
-	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())
-	generate_world(pos_to_chunk(player.global_position))
+	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))
+	generate_world(pos_to_chunk(player.position))
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
@@ -49,7 +70,7 @@ func generate_world(pos : Vector3):
 		if not outer.has(child.position) and child.layer == 2:
 			rendered_chunks.erase(child.position)
 			child.queue_free()
-		elif not inner.has(child.position) and child.layer == 1:
+		if not inner.has(child.position) and child.layer == 1:
 			rendered_chunks.erase(child.position)
 			child.queue_free()
 

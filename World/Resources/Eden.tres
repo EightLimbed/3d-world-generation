@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_8kq02")
-seeded = 1
+seeded = 25
 chunks = Array[Array]([])
 chunk_positions = Array[Vector3]([])
