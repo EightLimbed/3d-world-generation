@@ -36,7 +36,7 @@ func get_block(pos : Vector3):
 	elif hills >= pos.y-1:
 		block = 0
 	#caves
-	if caves > min(3+max(-3,pos.y/48),3) and pos.y < hills+caves_top-6:
+	if caves > 4-min(3,abs(sqrt(pos.y)/256)) and pos.y < hills+caves_top-6:
 		block = 6
 	return block
 
@@ -89,4 +89,4 @@ func middle_of(vec : Vector3, inner_size, outer_size):
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("saved")
-		ResourceSaver.save(world, "res://World/Resources/Eden.tres")
+		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
