@@ -2,49 +2,47 @@ extends Node3D
 
 var world = preload("res://World/Resources/Eden.tres")
 
-@export var chunk_size : int = 16
-@export var render_distance : int = 3
-@export var render_distance_far : int = 9
+@export var chunk_size : int = 24
+@export var render_distance : int = 5
+@export var render_distance_far : int = 5
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
 
-@onready var hill_noise = FastNoiseLite.new()
-@onready var cave_noise = FastNoiseLite.new()
+@onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
 @onready var chunk_container = $ChunkContainer
 @onready var label = $CanvasLayer/Label
 
 func _ready() -> void:
-		hill_noise.noise_type = FastNoiseLite.TYPE_PERLIN
-		hill_noise.frequency = 0.005
-		hill_noise.seed = world.seeded
-		cave_noise.noise_type = FastNoiseLite.TYPE_PERLIN
-		cave_noise.frequency = 0.05
-		cave_noise.seed = world.seeded
+		noise.noise_type = FastNoiseLite.TYPE_PERLIN
+		noise.frequency = 0.005
+		noise.seed = world.seeded
 		for child in $ChunkContainer.get_children():
 			child.queue_free() 
 
 #noise parameters
 func get_block(pos : Vector3):
-	var hills = hill_noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
-	var peaks = hill_noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
-	var caves = cave_noise.get_noise_3dv(pos)*10
+	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
+	hills*=abs(hills)
+	hills+=abs(hills)/1.5
+	var caves_top = noise.get_noise_2dv(Vector2(4*pos.x,4*pos.z))*30
+	var caves = noise.get_noise_3dv(pos*Vector3(4,4,4))*10
 	var block : int = 6
 	#stone
-	if hills*abs(hills) >= pos.y:
+	if hills >= pos.y:
 		block = 1
 	#grass
-	elif hills*abs(hills) >= pos.y-1:
+	elif hills >= pos.y-1:
 		block = 0
 	#caves
-	if caves > 30/abs(min(pos.y,1)):
+	if caves > min(3+max(-3,pos.y/48),3) and pos.y < hills+caves_top-6:
 		block = 6
 	return block
 
 func _process(_delta: float) -> void:
 	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))
-	generate_world(pos_to_chunk(player.position))
+	generate_world(Vector3.ZERO)
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
@@ -91,4 +89,4 @@ func middle_of(vec : Vector3, inner_size, outer_size):
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("saved")
-		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
+		ResourceSaver.save(world, "res://World/Resources/Eden.tres")

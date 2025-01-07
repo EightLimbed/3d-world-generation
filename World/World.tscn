@@ -4,8 +4,8 @@
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
-render_distance = 5
-render_distance_far = 5
+render_distance = 7
+render_distance_far = 7
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
