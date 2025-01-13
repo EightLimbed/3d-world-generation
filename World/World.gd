@@ -3,8 +3,8 @@ extends Node3D
 var world = preload("res://World/Resources/Eden.tres")
 
 @export var chunk_size : int = 24
-@export var render_distance : int = 5
-@export var render_distance_far : int = 5
+@export var lod_steps : Array[int] = []
+@export var render_distance : int = 8
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
 
@@ -26,7 +26,7 @@ func get_block(pos : Vector3):
 	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
 	hills*=abs(hills)
 	hills+=abs(hills)/1.5
-	var caves_top = noise.get_noise_2dv(Vector2(4*pos.x,4*pos.z))*30
+	var caves_top = noise.get_noise_2dv(Vector2(pos.x,pos.z)*Vector2(4,4))*30
 	var caves = noise.get_noise_3dv(pos*Vector3(4,4,4))*10
 	var block : int = 6
 	#stone
@@ -36,7 +36,7 @@ func get_block(pos : Vector3):
 	elif hills >= pos.y-1:
 		block = 0
 	#caves
-	if caves > 4-min(3,abs(sqrt(pos.y)/256)) and pos.y < hills+caves_top-6:
+	if caves > 4-min(abs(pos.y/15), 3) and pos.y < hills+caves_top-6:
 		block = 6
 	return block
 
@@ -48,29 +48,28 @@ func pos_to_chunk(pos):
 	return round(pos/chunk_size)
 
 func generate_world(pos : Vector3):
+	var lod_layers = []
+	for i in range(render_distance):
+		lod_layers.append([])
 	var inner = []
 	var outer = []
-	for x in range(render_distance_far):
-		for y in range(render_distance_far):
-			for z in range(render_distance_far):
+	for x in range(render_distance):
+		for y in range(render_distance):
+			for z in range(render_distance):
 				#change center distance to work
-				var center_distance = Vector3(render_distance_far,render_distance_far,render_distance_far)/2
+				var center_distance = Vector3(render_distance,render_distance,render_distance)/2
 				var updated_pos = (pos+Vector3(x,y,z)-center_distance)*chunk_size
-				if not middle_of(Vector3(x,y,z), render_distance, render_distance_far):
-					if not rendered_chunks.has(updated_pos):
-						create_chunk(updated_pos, 2)
-					outer.append(updated_pos)
-				else:
-					if not rendered_chunks.has(updated_pos):
-						create_chunk(updated_pos, 1)
-					inner.append(updated_pos)
+				for i in render_distance:
+					if middle_of(Vector3(x,y,z), i+1, render_distance):
+						if not rendered_chunks.has(updated_pos):
+							create_chunk(updated_pos, min(lod_steps[i],24))
+						lod_layers[i].append(updated_pos)
+
 	for child in chunk_container.get_children():
-		if not outer.has(child.position) and child.layer == 2:
-			rendered_chunks.erase(child.position)
-			child.queue_free()
-		if not inner.has(child.position) and child.layer == 1:
-			rendered_chunks.erase(child.position)
-			child.queue_free()
+		for i in render_distance:
+			if not lod_layers[i].has(child.position) and child.layer == i:
+				rendered_chunks.erase(child.position)
+				child.queue_free()
 
 func create_chunk(pos : Vector3, layer : int):
 	var instance = chunk.instantiate()

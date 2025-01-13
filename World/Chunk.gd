@@ -11,17 +11,14 @@ var uvs = PackedVector2Array()
 var block_subdivisions : int = 1
 var face_count : int = 0
 #groups texture atlas is split into
-var tex_div = 0.16666
+var tex_div = Vector2(0.16666,0.16666)
 #list of transparent blocks, index is block id, boolean is whether or not it is transparent (air is always at the end)
 const transparent : Array = [false, false, false, true, false, true, true]
 
 var blocks = []
 
 func generate():
-	if layer == 1:
-		block_subdivisions = 1
-	elif layer == 2:
-		block_subdivisions = 2
+	block_subdivisions = layer
 	generate_chunk()
 	create_mesh()
 
@@ -131,10 +128,10 @@ func create_block(pos : Vector3, size : int, type : int):
 		add_uv(type,5)
 
 func add_uv(x, y):
-	uvs.append(Vector2(tex_div * x, tex_div * y))
-	uvs.append(Vector2(tex_div * x + tex_div, tex_div * y))
-	uvs.append(Vector2(tex_div * x + tex_div, tex_div * y + tex_div))
-	uvs.append(Vector2(tex_div * x, tex_div * y + tex_div))
+	uvs.append(Vector2(tex_div.x * x, tex_div.y * y))
+	uvs.append(Vector2(tex_div.x * x + tex_div.x, tex_div.y * y))
+	uvs.append(Vector2(tex_div.x * x + tex_div.x, tex_div.y * y + tex_div.y))
+	uvs.append(Vector2(tex_div.x * x, tex_div.y * y + tex_div.y))
 
 func update_indices():
 	indices.append(face_count * 4 + 0)
