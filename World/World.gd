@@ -2,8 +2,11 @@ extends Node3D
 
 var world = preload("res://World/Resources/Eden.tres")
 
+#size of each chunk, in blocks (x,y,z)
 @export var chunk_size : int = 24
+#each concentric border will go through index of this by 1, each time increasing the size of each block, to render less
 @export var lod_steps : Array[int] = []
+#size of what is in view, in chunks (x,y,z), needs to be odd to avoid artifacts
 @export var render_distance : int = 8
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
@@ -21,8 +24,14 @@ func _ready() -> void:
 		for child in $ChunkContainer.get_children():
 			child.queue_free() 
 
-#noise parameters
 func get_block(pos : Vector3):
+	var block = 6
+	if pos.y <= 0:
+		block = 0
+	return block
+
+#noise parameters
+func get_block1(pos : Vector3):
 	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
 	hills*=abs(hills)
 	hills+=abs(hills)/1.5
@@ -41,35 +50,37 @@ func get_block(pos : Vector3):
 	return block
 
 func _process(_delta: float) -> void:
-	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))
+	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))
 	generate_world(Vector3.ZERO)
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
 
 func generate_world(pos : Vector3):
+	#constructs each concentric layer in render distance
 	var lod_layers = []
-	for i in range(render_distance):
+	for i in range(round(render_distance/2)):
 		lod_layers.append([])
-	var inner = []
-	var outer = []
+	#fills render distance with chunks
 	for x in range(render_distance):
 		for y in range(render_distance):
 			for z in range(render_distance):
-				#change center distance to work
-				var center_distance = Vector3(render_distance,render_distance,render_distance)/2
-				var updated_pos = (pos+Vector3(x,y,z)-center_distance)*chunk_size
-				for i in render_distance:
-					if middle_of(Vector3(x,y,z), i+1, render_distance):
-						if not rendered_chunks.has(updated_pos):
-							create_chunk(updated_pos, min(lod_steps[i],24))
-						lod_layers[i].append(updated_pos)
-
+				#centers position around targeted area
+				var center = Vector3(render_distance,render_distance,render_distance)/2
+				var updated_pos = (pos_to_chunk(pos)+Vector3(x,y,z)-center)*chunk_size
+				#finds distance of chunk from center, which is also its layer
+				var center_distance = longest_distance(pos_to_chunk(updated_pos+Vector3(1,1,1)-pos))
+				#creates chunk at position, and uses its layer as the index in the LOD chart
+				if not rendered_chunks.has(updated_pos):
+					create_chunk(updated_pos, center_distance)
+				#adds chunk position to layer
+				lod_layers[center_distance-2].append(updated_pos)
+	#clears chunks
 	for child in chunk_container.get_children():
-		for i in render_distance:
-			if not lod_layers[i].has(child.position) and child.layer == i:
-				rendered_chunks.erase(child.position)
-				child.queue_free()
+		#checks each child to see if its layer has its position. if it doesnt, the child is deleted
+		if not lod_layers[child.layer-2].has(child.position):
+			rendered_chunks.erase(child.position)
+			child.queue_free()
 
 func create_chunk(pos : Vector3, layer : int):
 	var instance = chunk.instantiate()
@@ -78,6 +89,14 @@ func create_chunk(pos : Vector3, layer : int):
 	chunk_container.add_child(instance)
 	instance.generate()
 	rendered_chunks.append(pos)
+
+func longest_distance(vec3 : Vector3):
+	var longest = abs(vec3.x)
+	if abs(vec3.y) > longest:
+		longest = abs(vec3.y)
+	if abs(vec3.z) > longest:
+		longest = abs(vec3.z)
+	return longest
 
 func middle_of(vec : Vector3, inner_size, outer_size):
 	var distance1 = (outer_size-inner_size)/2

@@ -18,7 +18,7 @@ const transparent : Array = [false, false, false, true, false, true, true]
 var blocks = []
 
 func generate():
-	block_subdivisions = layer
+	block_subdivisions = parent.lod_steps[min(parent.lod_steps.size()-1,layer)]
 	generate_chunk()
 	create_mesh()
 
@@ -59,7 +59,7 @@ func create_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 	mesh = a_mesh
-	if layer == 1:
+	if layer <= 1:
 		var trimesh_collisions = a_mesh.create_trimesh_shape()
 		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 		collisions.shape = trimesh_collisions

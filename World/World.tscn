@@ -4,7 +4,8 @@
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
-lod_steps = Array[int]([1, 2, 3, 4, 6, 8, 12, 24])
+lod_steps = Array[float]([1.0, 2.0, 3.0, 4.0, 6.0])
+render_distance = 13
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
