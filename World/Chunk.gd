@@ -1,6 +1,5 @@
 extends MeshInstance3D
 
-var layer : int
 @onready var parent = get_parent().get_parent()
 
 var a_mesh = ArrayMesh.new()
@@ -8,7 +7,7 @@ var vertices = PackedVector3Array()
 var indices = PackedInt32Array()
 var uvs = PackedVector2Array()
 
-var block_subdivisions : float = 1
+var block_subdivisions : int = 1
 var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = Vector2(0.16666,0.16666)
@@ -18,7 +17,6 @@ const transparent : Array = [false, false, false, true, false, true, true]
 var blocks = []
 
 func generate():
-	block_subdivisions = parent.lod_steps[min(parent.lod_steps.size()-1,layer)]
 	generate_chunk()
 	create_mesh()
 
@@ -59,10 +57,9 @@ func create_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 	mesh = a_mesh
-	if layer <= 1:
-		var trimesh_collisions = a_mesh.create_trimesh_shape()
-		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
-		collisions.shape = trimesh_collisions
+	var trimesh_collisions = a_mesh.create_trimesh_shape()
+	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
+	collisions.shape = trimesh_collisions
 
 func generate_mesh_singular():
 	for x in range(parent.chunk_size/block_subdivisions):
