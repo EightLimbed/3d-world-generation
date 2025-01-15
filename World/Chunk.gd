@@ -1,6 +1,6 @@
 extends MeshInstance3D
 
-@onready var parent = get_parent().get_parent()
+var parent : Node3D
 
 var a_mesh = ArrayMesh.new()
 var vertices = PackedVector3Array()
@@ -13,10 +13,40 @@ var face_count : int = 0
 var tex_div = Vector2(0.16666,0.16666)
 #list of transparent blocks, index is block id, boolean is whether or not it is transparent (air is always at the end)
 const transparent : Array = [false, false, false, true, false, true, true]
+var noise : FastNoiseLite
 
 var blocks = []
 
+func get_block(pos : Vector3):
+	var block = 6
+	if pos.y <= 0:
+		block = 0
+	return block
+
+#noise parameters
+func get_block1(pos : Vector3):
+	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
+	hills*=abs(hills)
+	hills+=abs(hills)/1.5
+	var caves_top = noise.get_noise_2dv(Vector2(pos.x,pos.z)*Vector2(4,4))*30
+	var caves = noise.get_noise_3dv(pos*Vector3(4,4,4))*10
+	var block : int = 6
+	#stone
+	if hills >= pos.y:
+		block = 1
+	#grass
+	elif hills >= pos.y-1:
+		block = 0
+	#caves
+	if caves > 3.2-min(abs(pos.y/16), 3) and pos.y < hills+caves_top-6:
+		block = 6
+	return block
+
 func generate():
+	noise = FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	noise.frequency = 0.005
+	noise.seed = parent.world.seeded
 	generate_chunk()
 	create_mesh()
 
@@ -29,7 +59,7 @@ func generate_chunk():
 			for y in range(parent.chunk_size+2):
 				blocks[x].append([])
 				for z in range(parent.chunk_size+2):
-					blocks[x][y].append(parent.get_block(Vector3(x,y,z)+position))
+					blocks[x][y].append(get_block(Vector3(x,y,z)+position))
 		#add structures, like trees
 		parent.world.chunk_positions.append(position)
 		parent.world.chunks.append(blocks)
