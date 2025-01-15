@@ -8,7 +8,7 @@ var vertices = PackedVector3Array()
 var indices = PackedInt32Array()
 var uvs = PackedVector2Array()
 
-var block_subdivisions : int = 1
+var block_subdivisions : float = 1
 var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = Vector2(0.16666,0.16666)
@@ -50,7 +50,7 @@ func create_mesh():
 	indices = PackedInt32Array()
 	uvs = PackedVector2Array()
 	face_count = 0
-	generate_mesh_singular(block_subdivisions)
+	generate_mesh_singular()
 	if face_count > 0:
 		var array = []
 		array.resize(Mesh.ARRAY_MAX)
@@ -64,15 +64,15 @@ func create_mesh():
 		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
 		collisions.shape = trimesh_collisions
 
-func generate_mesh_singular(block_size : int = 1):
-	for x in range(parent.chunk_size/block_size):
-		for y in range(parent.chunk_size/block_size):
-			for z in range(parent.chunk_size/block_size):
-				var block = blocks[block_size*x+1][block_size*y+1][block_size*z+1]
+func generate_mesh_singular():
+	for x in range(parent.chunk_size/block_subdivisions):
+		for y in range(parent.chunk_size/block_subdivisions):
+			for z in range(parent.chunk_size/block_subdivisions):
+				var block = blocks[block_subdivisions*x+1][block_subdivisions*y+1][block_subdivisions*z+1]
 				if block != 6:
-					create_block(block_size*Vector3(x, y, z)+Vector3(1,1,1), block_size, block)
+					create_block(block_subdivisions*Vector3(x, y, z)+Vector3(1,1,1), block_subdivisions, block)
 
-func create_block(pos : Vector3, size : int, type : int):
+func create_block(pos : Vector3, size : float, type : int):
 	#top
 	if not_transparent(pos + Vector3(0, size, 0), type):
 		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
