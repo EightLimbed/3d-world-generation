@@ -13,7 +13,6 @@ var rendered_chunk_positions : Array[Vector3]
 var chunks_thread : Thread
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
-@onready var label = $CanvasLayer/Label
 
 func _ready() -> void:
 		chunks_thread = Thread.new()
@@ -38,18 +37,18 @@ func generate_world(pos : Vector3):
 					if not rendered_chunk_positions.has(updated_pos):
 						create_chunk(updated_pos)
 		#clears chunks
-		for child in rendered_chunks:
-			if longest_distance(pos_to_chunk(child.position-pos)) > render_distance:
-				child.call_deferred("queue_free")
-				rendered_chunks.erase(child)
-				rendered_chunk_positions.erase(child.position)
+		#for child in rendered_chunks:
+			#if longest_distance(pos_to_chunk(child.position-pos)) > render_distance:
+				#child.call_deferred("queue_free")
+				#rendered_chunks.erase(child)
+				#rendered_chunk_positions.erase(child.position)
 
 func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
 	instance.position = pos
 	instance.parent = self
-	instance.generate()
 	call_deferred("add_child",instance)
+	instance.generate()
 	rendered_chunks.append(instance)
 	rendered_chunk_positions.append(pos)
 
