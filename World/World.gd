@@ -7,21 +7,26 @@ var world = preload("res://World/Resources/Eden.tres")
 #each concentric border will go through index of this by 1, each time increasing the size of each block, to render less
 #size of what is in view, in chunks (x,y,z), needs to be odd to avoid artifacts
 @export var render_distance : int = 8
+@export var forced_fps : int = 30
+var generated : bool = true
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
+var coroutine : bool = true
+var thread : Thread = Thread.new()
 
 @onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
 @onready var chunk_container = $ChunkContainer
 @onready var label = $CanvasLayer/Label
+@onready var timer = $Timer
 
 func _ready() -> void:
-		noise.noise_type = FastNoiseLite.TYPE_PERLIN
-		noise.frequency = 0.005
-		noise.seed = world.seeded
-		for child in $ChunkContainer.get_children():
-			child.queue_free() 
+	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	noise.frequency = 0.005
+	noise.seed = world.seeded
+	for child in $ChunkContainer.get_children():
+		child.queue_free()
 
 func get_block1(pos : Vector3):
 	var block = 6
@@ -48,19 +53,24 @@ func get_block(pos : Vector3):
 		block = 6
 	return block
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	timer.start()
+	coroutine = true
+	if generated:
+		generate_world(player.position)
 	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))
-	generate_world(player.position)
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
 
 func generate_world(pos : Vector3):
 	#fills render distance with chunks
+	generated = false
 	var center = Vector3(render_distance,render_distance,render_distance)/2
 	for x in range(render_distance):
 		for y in range(render_distance):
 			for z in range(render_distance):
+				await coroutine
 				#centers position around targeted area
 				var updated_pos = (pos_to_chunk(pos)+Vector3(x,y,z)-center)*chunk_size
 				#creates chunk at position if chunk not already rendered
@@ -72,6 +82,8 @@ func generate_world(pos : Vector3):
 		if longest_distance(pos_to_chunk(child.position-pos)+center) > render_distance:
 			rendered_chunks.erase(child.position)
 			child.queue_free()
+		await coroutine
+	generated = true
 
 func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
@@ -92,3 +104,7 @@ func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("saved")
 		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
+
+func _on_timer_timeout():
+	coroutine = false
+	print("can go")

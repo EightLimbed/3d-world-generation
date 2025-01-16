@@ -13,3 +13,10 @@ offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="ChunkContainer" type="Node3D" parent="."]
+
+[node name="Timer" type="Timer" parent="."]
+process_callback = 0
+wait_time = 0.01
+one_shot = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
