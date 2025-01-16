@@ -89,7 +89,7 @@ func create_mesh():
 	mesh = a_mesh
 	var trimesh_collisions = a_mesh.create_trimesh_shape()
 	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
-	#collisions.shape = trimesh_collisions
+	collisions.shape = trimesh_collisions
 
 func generate_mesh_singular():
 	for x in range(parent.chunk_size/block_subdivisions):
