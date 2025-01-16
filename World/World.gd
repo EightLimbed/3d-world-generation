@@ -50,29 +50,30 @@ func get_block(pos : Vector3):
 
 func _process(_delta: float) -> void:
 	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))
-	generate_world(Vector3.ZERO)
+	generate_world(player.position)
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
 
 func generate_world(pos : Vector3):
 	#fills render distance with chunks
+	var center = Vector3(render_distance,render_distance,render_distance)/2
 	for x in range(render_distance):
 		for y in range(render_distance):
 			for z in range(render_distance):
 				#centers position around targeted area
-				var updated_pos = (pos_to_chunk(pos)+Vector3(x,y,z)-Vector3(render_distance,render_distance,render_distance)/2)*chunk_size
-				#creates chunk at position
+				var updated_pos = (pos_to_chunk(pos)+Vector3(x,y,z)-center)*chunk_size
+				#creates chunk at position if chunk not already rendered
 				if not rendered_chunks.has(updated_pos):
-					create_chunk(updated_pos, 1)
+					create_chunk(updated_pos)
 					rendered_chunks.append(updated_pos)
 	#clears chunks
 	for child in chunk_container.get_children():
-		if longest_distance(pos_to_chunk(child.position-pos)) > render_distance:
-			child.queue_free()
+		if longest_distance(pos_to_chunk(child.position-pos)+center) > render_distance:
 			rendered_chunks.erase(child.position)
+			child.queue_free()
 
-func create_chunk(pos : Vector3, layer : int):
+func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
 	instance.position = pos
 	chunk_container.add_child(instance)
