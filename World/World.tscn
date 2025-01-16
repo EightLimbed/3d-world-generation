@@ -5,3 +5,11 @@
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
 render_distance = 5
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ChunkContainer" type="Node3D" parent="."]
