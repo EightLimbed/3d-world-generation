@@ -4,22 +4,23 @@ var world = preload("res://World/Resources/Eden.tres")
 
 #size of each chunk, in blocks (x,y,z)
 @export var chunk_size : int = 24
-#each concentric border will go through index of this by 1, each time increasing the size of each block, to render less
-#size of what is in view, in chunks (x,y,z), needs to be odd to avoid artifacts
 @export var render_distance : int = 8
-@export var forced_fps : int = 30
-var generated : bool = true
+@export var target_fps : float = 60
+@onready var center = Vector3(render_distance,render_distance,render_distance)/2
+
+#chunk coroutines handling 
 var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Array[Vector3]
-var coroutine : bool = true
-var thread : Thread = Thread.new()
+var generated : bool = true
+@export var chunks_per_frame : int = 1#render_distance ** 3
+var chunks_this_frame : int = 0
+signal new_frame
 
 @onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
 @onready var chunk_container = $ChunkContainer
 @onready var label = $CanvasLayer/Label
-@onready var timer = $Timer
 
 func _ready() -> void:
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN
@@ -28,69 +29,82 @@ func _ready() -> void:
 	for child in $ChunkContainer.get_children():
 		child.queue_free()
 
-func get_block1(pos : Vector3):
-	var block = 6
+func get_block(pos : Vector3):
+	var block = 0
 	if pos.y <= 0:
-		block = 0
+		block = 1
 	return block
 
 #noise parameters
-func get_block(pos : Vector3):
+func get_block1(pos : Vector3):
 	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
 	hills*=abs(hills)
 	hills+=abs(hills)/1.5
 	var caves_top = noise.get_noise_2dv(Vector2(pos.x,pos.z)*Vector2(4,4))*30
 	var caves = noise.get_noise_3dv(pos*Vector3(4,4,4))*10
-	var block : int = 6
-	#stone
-	if hills >= pos.y:
-		block = 1
-	#grass
-	elif hills >= pos.y-1:
-		block = 0
-	#caves
-	if caves > 3.2-min(abs(pos.y/16), 3) and pos.y < hills+caves_top-6:
-		block = 6
+	var block : int = 0
+	if not (caves > 3.2-min(abs(pos.y/16), 3) and pos.y < hills+caves_top-6):
+		#stone
+		if hills >= pos.y:
+			block = 2
+		#grass
+		elif hills >= pos.y-1:
+			block = 1
+		#caves
 	return block
 
 func _process(delta: float) -> void:
-	timer.start()
-	coroutine = true
+	#lets chunk generation know it can continue
+	new_frame.emit()
+	#lowers chunks per frame whenever fps drops below target
+	if delta > 1/target_fps:
+		#chunks_per_frame -= 1
+		pass
+	#if old operation is done, starts new one
 	if generated:
-		generate_world(player.position)
-	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))
+		create_chunks(player.position)
+	#if new chunks have been generated, remove unneeded ones
+	if chunks_this_frame > 0:
+		remove_chunks(player.position)
+	#reset allowed chunks
+	chunks_this_frame = 0
+	#display useful information
+	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))+ "\nchunks per frame: " + str(chunks_per_frame)
+	print(rendered_chunks.size())
 
 func pos_to_chunk(pos):
 	return round(pos/chunk_size)
 
-func generate_world(pos : Vector3):
+func remove_chunks(pos : Vector3):
+	#clears chunks
+	for child in chunk_container.get_children():
+		if longest_distance(pos_to_chunk(child.position)-pos_to_chunk(pos)) > render_distance:
+			rendered_chunks.erase(child.position)
+			child.queue_free()
+
+func create_chunks(pos : Vector3):
 	#fills render distance with chunks
 	generated = false
-	var center = Vector3(render_distance,render_distance,render_distance)/2
 	for x in range(render_distance):
 		for y in range(render_distance):
 			for z in range(render_distance):
-				await coroutine
+				chunks_this_frame += 1
+				if chunks_this_frame >= chunks_per_frame:
+					await new_frame
 				#centers position around targeted area
 				var updated_pos = (pos_to_chunk(pos)+Vector3(x,y,z)-center)*chunk_size
 				#creates chunk at position if chunk not already rendered
 				if not rendered_chunks.has(updated_pos):
 					create_chunk(updated_pos)
 					rendered_chunks.append(updated_pos)
-	#clears chunks
-	for child in chunk_container.get_children():
-		if longest_distance(pos_to_chunk(child.position-pos)+center) > render_distance:
-			rendered_chunks.erase(child.position)
-			child.queue_free()
-		await coroutine
 	generated = true
 
 func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
 	instance.position = pos
+	rendered_chunks.append(pos)
 	chunk_container.add_child(instance)
 	instance.generate()
-	rendered_chunks.append(pos)
 
 func longest_distance(vec3 : Vector3):
 	var longest = abs(vec3.x)
@@ -104,7 +118,3 @@ func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("saved")
 		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
-
-func _on_timer_timeout():
-	coroutine = false
-	print("can go")

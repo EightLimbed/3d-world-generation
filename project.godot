@@ -12,8 +12,13 @@ config_version=5
 
 config/name="3D World Generation"
 run/main_scene="res://Game.tscn"
-config/features=PackedStringArray("4.3", "Mobile")
+config/features=PackedStringArray("4.3", "C#", "Mobile")
+run/max_fps=999
 config/icon="res://icon.svg"
+
+[display]
+
+window/vsync/vsync_mode=0
 
 [dotnet]
 

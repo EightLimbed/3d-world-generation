@@ -12,7 +12,7 @@ var face_count : int = 0
 #groups texture atlas is split into
 var tex_div = Vector2(0.16666,0.16666)
 #list of transparent blocks, index is block id, boolean is whether or not it is transparent (air is always at the end)
-const transparent : Array = [false, false, false, true, false, true, true]
+const transparent : Array = [true, false, false, false, true, false, true]
 
 var blocks = []
 
@@ -56,17 +56,17 @@ func create_mesh():
 		array[Mesh.ARRAY_INDEX] = indices
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
-	mesh = a_mesh
-	var trimesh_collisions = a_mesh.create_trimesh_shape()
-	var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
-	collisions.shape = trimesh_collisions
+		mesh = a_mesh
+		var trimesh_collisions = a_mesh.create_trimesh_shape()
+		var collisions : CollisionShape3D = $StaticBody3D/CollisionShape3D
+		collisions.shape = trimesh_collisions
 
 func generate_mesh_singular():
 	for x in range(parent.chunk_size/block_subdivisions):
 		for y in range(parent.chunk_size/block_subdivisions):
 			for z in range(parent.chunk_size/block_subdivisions):
 				var block = blocks[block_subdivisions*x+1][block_subdivisions*y+1][block_subdivisions*z+1]
-				if block != 6:
+				if block != 0:
 					create_block(block_subdivisions*Vector3(x, y, z)+Vector3(1,1,1), block_subdivisions, block)
 
 func create_block(pos : Vector3, size : float, type : int):
@@ -77,7 +77,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5+size,  -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
 		update_indices()
-		add_uv(type,0)
+		add_uv(type-1,0)
 
 	#bottom
 	if not_transparent(pos + Vector3(0, -size, 0), type):
@@ -86,7 +86,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(type,1)
+		add_uv(type-1,1)
 
 	#left
 	if not_transparent(pos + Vector3(size, 0, 0), type):
@@ -95,7 +95,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5,-0.5))
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
 		update_indices()
-		add_uv(type,2)
+		add_uv(type-1,2)
 
 	#right
 	if not_transparent(pos + Vector3(-size, 0, 0), type):
@@ -104,7 +104,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
-		add_uv(type,3)
+		add_uv(type-1,3)
 
 	#front
 	if not_transparent(pos + Vector3(0, 0, size), type):
@@ -113,7 +113,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
 		update_indices()
-		add_uv(type,4)
+		add_uv(type-1,4)
 
 	#back
 	if not_transparent(pos + Vector3(0, 0, -size), type):
@@ -122,7 +122,7 @@ func create_block(pos : Vector3, size : float, type : int):
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
 		update_indices()
-		add_uv(type,5)
+		add_uv(type-1,5)
 
 func add_uv(x, y):
 	uvs.append(Vector2(tex_div.x * x, tex_div.y * y))
