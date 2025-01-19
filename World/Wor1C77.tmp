@@ -4,7 +4,9 @@
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
+chunk_size = null
 render_distance = 3
+target_fps = null
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

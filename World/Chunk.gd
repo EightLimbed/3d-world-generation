@@ -20,25 +20,26 @@ func generate():
 	generate_chunk()
 	create_mesh()
 
+func regenerate():
+	create_mesh()
+
 func generate_chunk():
-	if not chunk_generated():
+	if not check_generated():
 		blocks = []
-		blocks.resize(parent.chunk_size+2)
-		for x in range(parent.chunk_size+2):
+		blocks.resize(parent.chunk_size)
+		for x in range(parent.chunk_size):
 			blocks[x] = []
-			for y in range(parent.chunk_size+2):
+			for y in range(parent.chunk_size):
 				blocks[x].append([])
-				for z in range(parent.chunk_size+2):
+				for z in range(parent.chunk_size):
 					blocks[x][y].append(parent.get_block(Vector3(x,y,z)+position))
 		#add structures, like trees
-		parent.world.chunk_positions.append(position)
-		parent.world.chunks.append(blocks)
+		parent.world.chunks[position] = blocks
 
-func chunk_generated():
-	for i in parent.world.chunk_positions.size()-1:
-		if parent.world.chunk_positions[i] == position:
-			blocks = parent.world.chunks[i]
-			return true
+func check_generated():
+	if parent.world.chunks.has(position):
+		blocks = parent.world.chunks[position]
+		return true
 	return false
 
 func create_mesh():
@@ -65,9 +66,9 @@ func generate_mesh_singular():
 	for x in range(parent.chunk_size/block_subdivisions):
 		for y in range(parent.chunk_size/block_subdivisions):
 			for z in range(parent.chunk_size/block_subdivisions):
-				var block = blocks[block_subdivisions*x+1][block_subdivisions*y+1][block_subdivisions*z+1]
+				var block = blocks[block_subdivisions*x][block_subdivisions*y][block_subdivisions*z]
 				if block != 0:
-					create_block(block_subdivisions*Vector3(x, y, z)+Vector3(1,1,1), block_subdivisions, block)
+					create_block(block_subdivisions*Vector3(x, y, z), block_subdivisions, block)
 
 func create_block(pos : Vector3, size : float, type : int):
 	#top
@@ -139,11 +140,15 @@ func update_indices():
 	indices.append(face_count * 4 + 3)
 	face_count += 1
 
-func not_transparent(new_pos, type):
-	var new_value = blocks[new_pos.x][new_pos.y][new_pos.z]
-	if type == new_value:
+func not_transparent(pos, type):
+	var block = 0
+	if pos.x < 0 or pos.y < 0 or pos.z < 0 or pos.x >= parent.chunk_size or pos.y >= parent.chunk_size or pos.z >= parent.chunk_size:
+		block = parent.get_block(pos + position)
+	else:
+		block = blocks[pos.x][pos.y][pos.z]
+	if type == block:
 		return false
-	elif transparent[new_value]:
+	elif transparent[block]:
 		return true
 	else:
 		return false

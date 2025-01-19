@@ -12,7 +12,7 @@ radius = 0.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qa310"]
 transparency = 1
 cull_mode = 2
-albedo_color = Color(0.752941, 0.752941, 0.752941, 0.25098)
+albedo_color = Color(0.752941, 0.752941, 0.752941, 0.12549)
 
 [sub_resource type="BoxMesh" id="BoxMesh_8hcx4"]
 material = SubResource("StandardMaterial3D_qa310")
@@ -39,6 +39,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 rotation_order = 0
 
 [node name="RayCast3D" type="RayCast3D" parent="Neck/Camera"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
 target_position = Vector3(0, 0, -6)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

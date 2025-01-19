@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bf00mwck5gp0h"]
+[gd_scene load_steps=5 format=3 uid="uid://bf00mwck5gp0h"]
 
 [ext_resource type="Script" path="res://Player.gd" id="1_ye7mv"]
 
@@ -8,15 +8,6 @@ radius = 0.4
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_gvbhx"]
 radius = 0.4
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qa310"]
-transparency = 1
-cull_mode = 2
-albedo_color = Color(0.752941, 0.752941, 0.752941, 0.25098)
-
-[sub_resource type="BoxMesh" id="BoxMesh_8hcx4"]
-material = SubResource("StandardMaterial3D_qa310")
-size = Vector3(1.01, 1.01, 1.01)
 
 [sub_resource type="LabelSettings" id="LabelSettings_frd8w"]
 
@@ -29,17 +20,15 @@ shape = SubResource("CylinderShape3D_2i0el")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_gvbhx")
 
-[node name="BlockOutline" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_8hcx4")
-
 [node name="Neck" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 
 [node name="Camera" type="Camera3D" parent="Neck"]
 rotation_order = 0
 
-[node name="RayCast3D" type="RayCast3D" parent="Neck/Camera"]
-target_position = Vector3(0, 0, -6)
+[node name="RayCast3D" type="RayCast3D" parent="Neck"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
+target_position = Vector3(0, 0, -1)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
