@@ -21,6 +21,7 @@ func generate():
 	create_mesh()
 
 func regenerate():
+	blocks = parent.world.chunks[position]
 	create_mesh()
 
 func generate_chunk():

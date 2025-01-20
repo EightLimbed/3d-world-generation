@@ -7,6 +7,7 @@ var world = preload("res://World/Resources/Eden.tres")
 @export var render_distance : int = 7
 @export var target_fps : float = 60
 @onready var center = chunk_size*Vector3(render_distance,render_distance,render_distance)/2
+@onready var reference_offset = Vector3(chunk_size/2,chunk_size/2,chunk_size/2)
 
 #chunk coroutines handling 
 var chunk = preload("res://World/Chunk.tscn")
@@ -32,23 +33,39 @@ func _ready() -> void:
 	rendered_chunks.clear()
 
 func _set_block(global_pos : Vector3, block):
-	var chunk_pos = pos_to_chunk(global_pos)
+	#gets chunk position and position of block within the chunk
+	var chunk_pos = pos_to_chunk(global_pos)-reference_offset
 	var updated_pos = global_pos-chunk_pos
-	print(updated_pos)
+	#sets block in memory to the new block
 	world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
+	#finds chunks with chunk position and regenerates it based on memory
 	for child in chunk_container.get_children():
 		if child.position == chunk_pos:
-			child.regenerate()
+			child.call_deferred("regenerate")
+		#if chunk borders another chunk, regenerate that one too
+		if updated_pos.x > 23:
+			if child.position == chunk_pos+Vector3(chunk_size,0,0):
+				child.call_deferred("regenerate")
+		if updated_pos.x < 1:
+			if child.position == chunk_pos+Vector3(-chunk_size,0,0):
+				child.call_deferred("regenerate")
+		if updated_pos.y > 23:
+			if child.position == chunk_pos+Vector3(0,chunk_size,0):
+				child.call_deferred("regenerate")
+		if updated_pos.y < 1:
+			if child.position == chunk_pos+Vector3(0,-chunk_size,0):
+				child.call_deferred("regenerate")
+		if updated_pos.z > 23:
+			if child.position == chunk_pos+Vector3(0,0,chunk_size):
+				child.call_deferred("regenerate")
+		if updated_pos.z < 1:
+			if child.position == chunk_pos+Vector3(0,0,-chunk_size):
+				child.call_deferred("regenerate")
 
 #noise parameters
 func get_block(pos : Vector3):
 	var block : int = 0
-	var chunk_pos = pos_to_chunk(pos)
-	#checks if chunk being referenced is already loaded, and if it has checks for that block
-	if world.chunks.has(chunk_pos):
-		var updated_pos = pos-chunk_pos
-		block = world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z]
-		return block
+	#checks if chunk being referenced is already saved, and if it has it checks for that block
 	#gets block based on noise values
 	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
 	hills*=abs(hills)
@@ -81,17 +98,18 @@ func _process(delta: float) -> void:
 	if generated:
 		create_chunks(player.position)
 	#display useful information
-	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position))+ "\nchunks per frame: " + str(chunks_per_frame+1)
+	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position)-reference_offset)+ "\nchunks per frame: " + str(chunks_per_frame+1)
 
-func pos_to_chunk(pos):
+func pos_to_chunk(pos) -> Vector3:
 	return round(pos/chunk_size)*chunk_size
 
 func remove_chunks(pos : Vector3):
+	var updated_pos = pos_to_chunk(pos)
 	#clears chunks
 	for child in chunk_container.get_children():
-		if longest_distance(pos_to_chunk(child.position)-pos_to_chunk(pos))/chunk_size > render_distance-1:
+		if longest_distance(pos_to_chunk(child.position)-updated_pos)/chunk_size > render_distance-1:
 			rendered_chunks.erase(child.position)
-			child.queue_free()
+			child.call_deferred("queue_free")
 
 func create_chunks(pos : Vector3):
 	#fills render distance with chunks

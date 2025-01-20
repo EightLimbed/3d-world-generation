@@ -30,17 +30,17 @@ func _physics_process(delta: float) -> void:
 		var norm = raycast.get_collision_normal()
 		var pos = raycast.get_collision_point() - norm*0.5
 
-		var bx = floor(pos.x)+0.5
-		var by = floor(pos.y)+0.5
-		var bz = floor(pos.z)+0.5
+		var bx = floor(pos.x+0.5)
+		var by = floor(pos.y+0.5)
+		var bz = floor(pos.z+0.5)
 		var bpos = Vector3(bx, by, bz) - self.position
 
-		block_outline.position = bpos-Vector3(0.5,0.5,0.5)
+		block_outline.position = bpos
 		block_outline.visible = true
 		if Input.is_action_just_pressed("Break"):
-			set_block.emit(pos, 0)
+			set_block.emit(pos+Vector3(0.5,0.5,0.5), 0)
 		if Input.is_action_just_pressed("Use"):
-			set_block.emit(pos+norm, 1)
+			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), 4)
 	else:
 		block_outline.visible = false
 
