@@ -64,10 +64,10 @@ func create_mesh():
 		collisions.shape = trimesh_collisions
 
 func generate_mesh_singular():
-	for x in range(parent.chunk_size/block_subdivisions):
-		for y in range(parent.chunk_size/block_subdivisions):
-			for z in range(parent.chunk_size/block_subdivisions):
-				var block = blocks[block_subdivisions*x][block_subdivisions*y][block_subdivisions*z]
+	for x in range(parent.chunk_size):
+		for y in range(parent.chunk_size):
+			for z in range(parent.chunk_size):
+				var block = blocks[x][y][z]
 				if block != 0:
 					create_block(block_subdivisions*Vector3(x, y, z), block_subdivisions, block)
 
@@ -144,7 +144,7 @@ func update_indices():
 func not_transparent(pos, type):
 	var block = 0
 	if pos.x < 0 or pos.y < 0 or pos.z < 0 or pos.x >= parent.chunk_size or pos.y >= parent.chunk_size or pos.z >= parent.chunk_size:
-		block = parent.get_block(pos + position)
+		block = parent.get_block(pos-Vector3(1,1,1) + position)
 	else:
 		block = blocks[pos.x][pos.y][pos.z]
 	if type == block:

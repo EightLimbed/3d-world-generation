@@ -4,10 +4,11 @@ var world = preload("res://World/Resources/Eden.tres")
 
 #size of each chunk, in blocks (x,y,z)
 @export var chunk_size : int = 24
+#always make this odd
 @export var render_distance : int = 7
 @export var target_fps : float = 60
 @onready var center = chunk_size*Vector3(render_distance,render_distance,render_distance)/2
-@onready var reference_offset = Vector3(chunk_size/2,chunk_size/2,chunk_size/2)
+@onready var reference_offset = Vector3(chunk_size,chunk_size,chunk_size)/2
 
 #chunk coroutines handling 
 var chunk = preload("res://World/Chunk.tscn")
@@ -64,8 +65,12 @@ func _set_block(global_pos : Vector3, block):
 
 #noise parameters
 func get_block(pos : Vector3):
-	var block : int = 0
 	#checks if chunk being referenced is already saved, and if it has it checks for that block
+	var chunk_pos = pos_to_chunk(pos)-reference_offset
+	if world.chunks.has(chunk_pos):
+		var updated_pos = pos-chunk_pos-Vector3(1,1,1)
+		#print(updated_pos)
+		return world.chunks[chunk_pos][updated_pos.x-1][updated_pos.y-1][updated_pos.z-1]
 	#gets block based on noise values
 	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
 	hills*=abs(hills)
@@ -75,11 +80,11 @@ func get_block(pos : Vector3):
 	if not (caves > 3.5-min(abs(pos.y/25), 3) and pos.y < hills+caves_top-6):
 		#stone
 		if hills >= pos.y:
-			block = 2
+			return 2
 		#grass
 		elif hills >= pos.y-1:
-			block = 1
-	return block
+			return 1
+	return 0
 
 func _process(delta: float) -> void:
 	#if new chunks have been generated, remove unneeded ones
