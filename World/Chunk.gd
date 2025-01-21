@@ -1,6 +1,6 @@
 extends MeshInstance3D
 
-@onready var parent = get_parent().get_parent()
+var parent : Node
 
 var a_mesh = ArrayMesh.new()
 var vertices = PackedVector3Array()
@@ -33,7 +33,7 @@ func generate_chunk():
 			for y in range(parent.chunk_size):
 				blocks[x].append([])
 				for z in range(parent.chunk_size):
-					blocks[x][y].append(parent.get_block(Vector3(x,y,z)+position))
+					blocks[x][y].append(parent.get_block_noise(Vector3(x,y,z)+position))
 		#add structures, like trees
 		parent.world.chunks[position] = blocks
 
@@ -144,7 +144,7 @@ func update_indices():
 func not_transparent(pos, type):
 	var block = 0
 	if pos.x < 0 or pos.y < 0 or pos.z < 0 or pos.x >= parent.chunk_size or pos.y >= parent.chunk_size or pos.z >= parent.chunk_size:
-		block = parent.get_block(pos-Vector3(1,1,1) + position)
+		block = parent.get_block(pos,position)
 	else:
 		block = blocks[pos.x][pos.y][pos.z]
 	if type == block:

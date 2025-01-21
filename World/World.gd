@@ -63,28 +63,49 @@ func _set_block(global_pos : Vector3, block):
 			if child.position == chunk_pos+Vector3(0,0,-chunk_size):
 				child.call_deferred("regenerate")
 
-#noise parameters
-func get_block(pos : Vector3):
-	#checks if chunk being referenced is already saved, and if it has it checks for that block
-	var chunk_pos = pos_to_chunk(pos)-reference_offset
-	if world.chunks.has(chunk_pos):
-		var updated_pos = pos-chunk_pos-Vector3(1,1,1)
-		#print(updated_pos)
-		return world.chunks[chunk_pos][updated_pos.x-1][updated_pos.y-1][updated_pos.z-1]
-	#gets block based on noise values
-	var hills = noise.get_noise_2dv(Vector2(pos.x,pos.z))*20
-	hills*=abs(hills)
-	hills+=abs(hills)/1.5
-	var caves_top = noise.get_noise_2dv(Vector2(pos.x,pos.z)*4)*30
-	var caves = noise.get_noise_3dv(pos*5)*10
-	if not (caves > 3.5-min(abs(pos.y/25), 3) and pos.y < hills+caves_top-6):
-		#stone
+func get_block_noise(pos: Vector3) -> int:
+	var hills = noise.get_noise_2dv(Vector2(pos.x, pos.z)) * 20
+	hills *= abs(hills)
+	hills += abs(hills) / 1.5
+	var caves_top = noise.get_noise_2dv(Vector2(pos.x, pos.z) * 4) * 30
+	var caves = noise.get_noise_3dv(pos * 5) * 10
+	if not (caves > 3.5 - min(abs(pos.y / 25), 3) and pos.y < hills + caves_top - 6):
+		# stone
 		if hills >= pos.y:
 			return 2
-		#grass
-		elif hills >= pos.y-1:
+		# grass
+		elif hills >= pos.y - 1:
 			return 1
 	return 0
+
+#noise parameters
+func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
+	# handle neighboring chunks
+	if local_pos.x < 0 or local_pos.x >= chunk_size or local_pos.y < 0 or local_pos.y >= chunk_size or local_pos.z < 0 or local_pos.z >= chunk_size:
+		#wtf was i doing here
+		if local_pos.x < 0:
+			chunk_pos.x -= chunk_size
+			local_pos.x += chunk_size
+		elif local_pos.x >= chunk_size:
+			chunk_pos.x += chunk_size
+			local_pos.x -= chunk_size
+		if local_pos.y < 0:
+			chunk_pos.y -= chunk_size
+			local_pos.y += chunk_size
+		elif local_pos.y >= chunk_size:
+			chunk_pos.y += chunk_size
+			local_pos.y -= chunk_size
+		if local_pos.z < 0:
+			chunk_pos.z -= chunk_size
+			local_pos.z += chunk_size
+		elif local_pos.z >= chunk_size:
+			chunk_pos.z += chunk_size
+			local_pos.z -= chunk_size
+	#gets block if it can
+	if world.chunks.has(chunk_pos):
+		return world.chunks[chunk_pos][int(local_pos.x)][int(local_pos.y)][int(local_pos.z)]
+	#gets procedural generation if nothing can be referenced
+	return get_block_noise(local_pos+chunk_pos)
 
 func _process(delta: float) -> void:
 	#if new chunks have been generated, remove unneeded ones
@@ -135,6 +156,7 @@ func create_chunks(pos : Vector3):
 func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
 	instance.position = pos
+	instance.parent = self
 	rendered_chunks.append(instance.position)
 	chunk_container.add_child(instance)
 	instance.generate()
