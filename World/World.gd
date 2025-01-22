@@ -12,8 +12,9 @@ var world = preload("res://World/Resources/Eden.tres")
 
 #chunk coroutines handling 
 var chunk = preload("res://World/Chunk.tscn")
-var rendered_chunks : Array[Vector3]
+var rendered_chunks : Dictionary
 var generated : bool = true
+var tagged_chunks : Array = []
 @onready var chunks_per_frame : int = 0
 var chunks_this_frame : int = 0
 signal new_frame
@@ -39,29 +40,21 @@ func _set_block(global_pos : Vector3, block):
 	var updated_pos = global_pos-chunk_pos
 	#sets block in memory to the new block
 	world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
-	#finds chunks with chunk position and regenerates it based on memory
-	for child in chunk_container.get_children():
-		if child.position == chunk_pos:
-			child.call_deferred("regenerate")
-		#if chunk borders another chunk, regenerate that one too
-		if updated_pos.x > 23:
-			if child.position == chunk_pos+Vector3(chunk_size,0,0):
-				child.call_deferred("regenerate")
-		if updated_pos.x < 1:
-			if child.position == chunk_pos+Vector3(-chunk_size,0,0):
-				child.call_deferred("regenerate")
-		if updated_pos.y > 23:
-			if child.position == chunk_pos+Vector3(0,chunk_size,0):
-				child.call_deferred("regenerate")
-		if updated_pos.y < 1:
-			if child.position == chunk_pos+Vector3(0,-chunk_size,0):
-				child.call_deferred("regenerate")
-		if updated_pos.z > 23:
-			if child.position == chunk_pos+Vector3(0,0,chunk_size):
-				child.call_deferred("regenerate")
-		if updated_pos.z < 1:
-			if child.position == chunk_pos+Vector3(0,0,-chunk_size):
-				child.call_deferred("regenerate")
+	#finds chunks with chunk position and tags it for regeneration based on memory
+	tagged_chunks.append(chunk_pos)
+	#if chunk borders another chunk, tag that one regeneration that one too
+	if updated_pos.x > 23:
+		tagged_chunks.append(chunk_pos+Vector3(chunk_size,0,0))
+	if updated_pos.x < 1:
+		tagged_chunks.append(chunk_pos+Vector3(-chunk_size,0,0))
+	if updated_pos.y > 23:
+		tagged_chunks.append(chunk_pos+Vector3(0,chunk_size,0))
+	if updated_pos.y < 1:
+		tagged_chunks.append(chunk_pos+Vector3(0,-chunk_size,0))
+	if updated_pos.z > 23:
+		tagged_chunks.append(chunk_pos+Vector3(0,0,chunk_size))
+	if updated_pos.z < 1:
+		tagged_chunks.append(chunk_pos+Vector3(0,0,-chunk_size))
 
 func get_block_noise(pos: Vector3) -> int:
 	var hills = noise.get_noise_2dv(Vector2(pos.x, pos.z)) * 20
@@ -108,6 +101,12 @@ func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
 	return get_block_noise(local_pos+chunk_pos)
 
 func _process(delta: float) -> void:
+	if not tagged_chunks.is_empty():
+		print(tagged_chunks)
+		for child in chunk_container.get_children():
+			if tagged_chunks.has(child.position):
+				child.regenerate()
+		tagged_chunks.clear()
 	#if new chunks have been generated, remove unneeded ones
 	if chunks_this_frame > 0:
 		#lowers chunks per frame whenever fps drops below target
@@ -146,7 +145,7 @@ func create_chunks(pos : Vector3):
 				#centers position around targeted area
 				var updated_pos = Vector3(x,y,z)*chunk_size-center+pos_to_chunk(pos)
 				#creates chunk at position if chunk not already rendered
-				if not rendered_chunks.has(updated_pos):
+				if updated_pos not in rendered_chunks:
 					chunks_this_frame += 1
 					create_chunk(updated_pos)
 				if chunks_this_frame >= chunks_per_frame:
@@ -157,7 +156,7 @@ func create_chunk(pos : Vector3):
 	var instance = chunk.instantiate()
 	instance.position = pos
 	instance.parent = self
-	rendered_chunks.append(instance.position)
+	rendered_chunks[instance.position] = true
 	chunk_container.add_child(instance)
 	instance.generate()
 
