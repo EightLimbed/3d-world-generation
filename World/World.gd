@@ -15,10 +15,10 @@ var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Dictionary
 var generated : bool = true
 var tagged_chunks : Dictionary
-@onready var chunks_per_frame : int = 0
+@onready var chunks_per_frame : int = (render_distance.x*render_distance.z)/2
 var chunks_this_frame : int = 0
 signal new_frame
-var tree : Dictionary = {Vector3(1, 2, 0): 4, Vector3(3, 2, 0): 4, Vector3(2, 3, 0): 4, Vector3(2, 4, 0): 4 }
+var tree : Dictionary = {Vector3(0, 0, 0): 4, Vector3(2, 0, 0): 4, Vector3(1, 1, 0): 4, Vector3(1, 2, 0): 4 }
 
 @onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
@@ -35,7 +35,7 @@ func _ready() -> void:
 		child.queue_free()
 	rendered_chunks.clear()
 
-func get_block_noise(pos: Vector3) -> int:
+func get_block_noise(pos: Vector3):
 	var hills = noise.get_noise_2dv(Vector2(pos.x, pos.z)) * 20
 	hills *= abs(hills)
 	hills += abs(hills) / 1.5
@@ -47,10 +47,12 @@ func get_block_noise(pos: Vector3) -> int:
 			return 2
 		# grass
 		elif hills >= pos.y - 1:
+			#makes trees sometimes
+			random.seed = hash(pos*world.seeded)
 			return 1
 	return 0
 
-func set_block(global_pos : Vector3, block):
+func set_block(global_pos : Vector3, block, regenerate : bool = true):
 	#gets chunk position and position of block within the chunk
 	var chunk_pos = pos_to_chunk(global_pos)-reference_offset
 	var updated_pos = global_pos-chunk_pos
@@ -58,20 +60,21 @@ func set_block(global_pos : Vector3, block):
 	if chunk_pos in world.chunks:
 		world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
 	#finds chunks with chunk position and tags it for regeneration based on memory
-	tagged_chunks[chunk_pos] = true
-	#if chunk borders another chunk, tag that one regeneration that one too
-	if updated_pos.x > chunk_size-1:
-		tagged_chunks[chunk_pos+Vector3(chunk_size,0,0)] = true
-	if updated_pos.x < 1:
-		tagged_chunks[chunk_pos+Vector3(-chunk_size,0,0)] = true
-	if updated_pos.y > chunk_size-1:
-		tagged_chunks[chunk_pos+Vector3(0,chunk_size,0)] = true
-	if updated_pos.y < 1:
-		tagged_chunks[chunk_pos+Vector3(0,-chunk_size,0)] = true
-	if updated_pos.z > chunk_size-1:
-		tagged_chunks[chunk_pos+Vector3(0,0,chunk_size)] = true
-	if updated_pos.z < 1:
-		tagged_chunks[chunk_pos+Vector3(0,0,-chunk_size)] = true
+	if regenerate:
+		tagged_chunks[chunk_pos] = true
+		#if chunk borders another chunk, tag that one regeneration that one too
+		if updated_pos.x > chunk_size-1:
+			tagged_chunks[chunk_pos+Vector3(chunk_size,0,0)] = true
+		if updated_pos.x < 1:
+			tagged_chunks[chunk_pos+Vector3(-chunk_size,0,0)] = true
+		if updated_pos.y > chunk_size-1:
+			tagged_chunks[chunk_pos+Vector3(0,chunk_size,0)] = true
+		if updated_pos.y < 1:
+			tagged_chunks[chunk_pos+Vector3(0,-chunk_size,0)] = true
+		if updated_pos.z > chunk_size-1:
+			tagged_chunks[chunk_pos+Vector3(0,0,chunk_size)] = true
+		if updated_pos.z < 1:
+			tagged_chunks[chunk_pos+Vector3(0,0,-chunk_size)] = true
 
 #noise parameters
 func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
@@ -172,4 +175,4 @@ func longest_distance(vec3 : Vector3):
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		print("Saved")
-		ResourceSaver.save(world, "res://World/Resources/Eden.tres")
+		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
