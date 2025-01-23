@@ -24,7 +24,6 @@ func regenerate():
 
 func generate_chunk():
 	if not check_generated():
-		parent.generate_structures(position)
 		blocks = []
 		blocks.resize(parent.chunk_size)
 		for x in range(parent.chunk_size):
@@ -33,7 +32,6 @@ func generate_chunk():
 				blocks[x].append([])
 				for z in range(parent.chunk_size):
 					blocks[x][y].append(parent.get_block_noise(Vector3(x,y,z)+position))
-		#add structures, like trees
 		parent.world.chunks[position] = blocks
 
 func check_generated():

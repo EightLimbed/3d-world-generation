@@ -20,7 +20,6 @@ var chunks_this_frame : int = 0
 signal new_frame
 var structures : Dictionary
 var tree : Dictionary = {Vector3(0, 0, 0): 5, Vector3(0, 1, 0): 5, Vector3(0, 2, 0): 5, Vector3(0, 3, 0): 5, Vector3(1, 3, 0): 6, Vector3(0, 3, -1): 6, Vector3(1, 3, -1): 6, Vector3(-1, 3, -1): 6, Vector3(-1, 3, 0): 6, Vector3(-1, 3, 1): 6, Vector3(0, 3, 1): 6, Vector3(1, 3, 1): 6, Vector3(-1, 4, 0): 6, Vector3(0, 4, 0): 6, Vector3(1, 4, 0): 6, Vector3(0, 4, 1): 6, Vector3(0, 4, -1): 6 }
-var structure_zero : Vector3
 
 @onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
@@ -39,10 +38,9 @@ func _ready() -> void:
 	structures.clear()
 
 func get_block_noise(pos: Vector3):
-	#checks if block has structure on it
+	#gets noise
 	if structures.has(pos):
 		return structures[pos]
-	#gets noise
 	var hills = noise.get_noise_2d(pos.x, pos.z) * 20
 	hills *= abs(hills)
 	hills += abs(hills) / 1.5
@@ -54,7 +52,6 @@ func get_block_noise(pos: Vector3):
 			return 2
 		# grass
 		elif hills >= pos.y - 1:
-			random.seed = hash(pos*world.seeded)
 			return 1
 	return 0
 
@@ -66,7 +63,7 @@ func generate_structures(chunk_pos):
 		var hills = noise.get_noise_2dv(tree_pos) * 20
 		hills *= abs(hills)
 		hills += abs(hills) / 1.5
-		if round(hills+0.5)-6 < chunk_pos.y:
+		if round(hills+0.5)+5-chunk_size < chunk_pos.y and round(hills+0.5) > chunk_pos.y:
 			apply_structure(tree, Vector3(tree_pos.x, round(hills+0.5), tree_pos.y))
 
 func apply_structure(structure : Dictionary, pos):
@@ -80,8 +77,6 @@ func set_block(global_pos : Vector3, block):
 	#sets block in memory to the new block, or adds it to structure queue
 	if chunk_pos in world.chunks:
 		world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
-		if structure_zero == Vector3.ZERO:
-			structure_zero = updated_pos
 		#finds chunks with chunk position and tags it for regeneration based on memory
 		tagged_chunks[chunk_pos] = true
 		#if chunk borders another chunk, tag that one regeneration that one too
@@ -192,6 +187,7 @@ func create_chunk(pos : Vector3):
 	instance.parent = self
 	rendered_chunks[instance.position] = true
 	chunk_container.add_child(instance)
+	generate_structures(instance.position)
 	instance.generate()
 
 func longest_distance(vec3 : Vector3):
