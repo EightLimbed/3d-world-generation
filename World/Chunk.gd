@@ -15,12 +15,21 @@ const transparent : Array = [true, false, false, false, false, false, true, true
 var blocks = []
 
 func generate():
+	$Area3D/CollisionShape3D.shape.size = Vector3(parent.chunk_size, parent.chunk_size, parent.chunk_size)*2
 	generate_chunk()
 	create_mesh()
+	#add_collisions()
 
 func regenerate():
 	blocks = parent.world.chunks[position]
 	create_mesh()
+	var trimesh_collisions = a_mesh.create_trimesh_shape()
+	$StaticBody3D/CollisionShape3D.shape = trimesh_collisions
+
+func _on_area_3d_body_entered(body: Node3D) -> void:
+	var trimesh_collisions = a_mesh.create_trimesh_shape()
+	$StaticBody3D/CollisionShape3D.shape = trimesh_collisions
+	$Area3D.set_deferred("monitoring", false)
 
 func generate_chunk():
 	if not check_generated():
@@ -63,8 +72,6 @@ func create_mesh():
 		array[Mesh.ARRAY_TEX_UV] = uvs
 		a_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,array)
 		mesh = a_mesh
-		var trimesh_collisions = a_mesh.create_trimesh_shape()
-		$StaticBody3D/CollisionShape3D.shape = trimesh_collisions
 
 func create_block(pos : Vector3, size : float, type : int):
 	#top

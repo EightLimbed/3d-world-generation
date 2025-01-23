@@ -21,6 +21,7 @@ size = Vector3(1.01, 1.01, 1.01)
 [sub_resource type="LabelSettings" id="LabelSettings_frd8w"]
 
 [node name="Player" type="CharacterBody3D"]
+collision_layer = 2
 script = ExtResource("1_ye7mv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

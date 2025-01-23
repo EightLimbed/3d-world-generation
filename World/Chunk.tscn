@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://rqvooj081igb"]
+[gd_scene load_steps=6 format=3 uid="uid://rqvooj081igb"]
 
 [ext_resource type="Texture2D" uid="uid://bpirrhbrxq1q7" path="res://Blocks.png" id="1_jblaw"]
 [ext_resource type="Script" path="res://World/Chunk.gd" id="2_3l77v"]
@@ -12,6 +12,9 @@ albedo_texture = ExtResource("1_jblaw")
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_2bg7a"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_132ol"]
+size = Vector3(24, 24, 24)
+
 [node name="Chunk" type="MeshInstance3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.76728e-05, 0, 7.3567e-05)
 material_override = SubResource("StandardMaterial3D_f3ic6")
@@ -21,3 +24,13 @@ script = ExtResource("2_3l77v")
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_132ol")
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]

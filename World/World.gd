@@ -40,7 +40,9 @@ func _ready() -> void:
 func get_block_noise(pos: Vector3):
 	#gets noise
 	if structures.has(pos):
-		return structures[pos]
+		var block = structures[pos]
+		structures.erase(pos)
+		return block
 	var hills = noise.get_noise_2d(pos.x, pos.z) * 20
 	hills *= abs(hills)
 	hills += abs(hills) / 1.5
