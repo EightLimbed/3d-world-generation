@@ -37,7 +37,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("Break"):
 			set_block.emit(pos+Vector3(0.5,0.5,0.5), 0)
 		if Input.is_action_just_pressed("Use"):
-			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), 4)
+			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), 6)
 	else:
 		block_outline.visible = false
 	#movement

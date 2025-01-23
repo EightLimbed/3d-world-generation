@@ -18,7 +18,9 @@ var tagged_chunks : Dictionary
 @onready var chunks_per_frame : int = (render_distance.x*render_distance.z)/2
 var chunks_this_frame : int = 0
 signal new_frame
-var tree : Dictionary = {Vector3(0, 0, 0): 4, Vector3(2, 0, 0): 4, Vector3(1, 1, 0): 4, Vector3(1, 2, 0): 4 }
+var structures : Dictionary
+var tree : Dictionary = {Vector3(0, 0, 0): 5, Vector3(0, 1, 0): 5, Vector3(0, 2, 0): 5, Vector3(0, 3, 0): 5, Vector3(1, 3, 0): 6, Vector3(0, 3, -1): 6, Vector3(1, 3, -1): 6, Vector3(-1, 3, -1): 6, Vector3(-1, 3, 0): 6, Vector3(-1, 3, 1): 6, Vector3(0, 3, 1): 6, Vector3(1, 3, 1): 6, Vector3(-1, 4, 0): 6, Vector3(0, 4, 0): 6, Vector3(1, 4, 0): 6, Vector3(0, 4, 1): 6, Vector3(0, 4, -1): 6 }
+var structure_zero : Vector3
 
 @onready var noise = FastNoiseLite.new()
 @onready var random = RandomNumberGenerator.new()
@@ -34,12 +36,17 @@ func _ready() -> void:
 	for child in $ChunkContainer.get_children():
 		child.queue_free()
 	rendered_chunks.clear()
+	structures.clear()
 
 func get_block_noise(pos: Vector3):
-	var hills = noise.get_noise_2dv(Vector2(pos.x, pos.z)) * 20
+	#checks if block has structure on it
+	if structures.has(pos):
+		return structures[pos]
+	#gets noise
+	var hills = noise.get_noise_2d(pos.x, pos.z) * 20
 	hills *= abs(hills)
 	hills += abs(hills) / 1.5
-	var caves_top = noise.get_noise_2dv(Vector2(pos.x, pos.z) * 4) * 30
+	var caves_top = noise.get_noise_2d(pos.x * 4, pos.z * 4) * 30
 	var caves = noise.get_noise_3dv(pos * 5) * 10
 	if not (caves > 3.5 - min(abs(pos.y / 25), 3) and pos.y < hills + caves_top - 6):
 		# stone
@@ -47,20 +54,35 @@ func get_block_noise(pos: Vector3):
 			return 2
 		# grass
 		elif hills >= pos.y - 1:
-			#makes trees sometimes
 			random.seed = hash(pos*world.seeded)
 			return 1
 	return 0
 
-func set_block(global_pos : Vector3, block, regenerate : bool = true):
+func generate_structures(chunk_pos):
+	random.seed = hash(chunk_pos)
+	#trees
+	for i in random.randi_range(0,10):
+		var tree_pos = Vector2(random.randi_range(1,chunk_size-2),random.randi_range(1,chunk_size-2))+Vector2(chunk_pos.x,chunk_pos.z)
+		var hills = noise.get_noise_2dv(tree_pos) * 20
+		hills *= abs(hills)
+		hills += abs(hills) / 1.5
+		if round(hills+0.5)-6 < chunk_pos.y:
+			apply_structure(tree, Vector3(tree_pos.x, round(hills+0.5), tree_pos.y))
+
+func apply_structure(structure : Dictionary, pos):
+	for key in structure.keys():
+		structures[key+pos] = structure[key]
+
+func set_block(global_pos : Vector3, block):
 	#gets chunk position and position of block within the chunk
 	var chunk_pos = pos_to_chunk(global_pos)-reference_offset
 	var updated_pos = global_pos-chunk_pos
-	#sets block in memory to the new block
+	#sets block in memory to the new block, or adds it to structure queue
 	if chunk_pos in world.chunks:
 		world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
-	#finds chunks with chunk position and tags it for regeneration based on memory
-	if regenerate:
+		if structure_zero == Vector3.ZERO:
+			structure_zero = updated_pos
+		#finds chunks with chunk position and tags it for regeneration based on memory
 		tagged_chunks[chunk_pos] = true
 		#if chunk borders another chunk, tag that one regeneration that one too
 		if updated_pos.x > chunk_size-1:
@@ -75,9 +97,12 @@ func set_block(global_pos : Vector3, block, regenerate : bool = true):
 			tagged_chunks[chunk_pos+Vector3(0,0,chunk_size)] = true
 		if updated_pos.z < 1:
 			tagged_chunks[chunk_pos+Vector3(0,0,-chunk_size)] = true
+	else:
+		structures[global_pos] = block
 
 #noise parameters
 func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
+	var global_pos = local_pos+chunk_pos
 	# handle neighboring chunks
 	if local_pos.x < 0 or local_pos.x >= chunk_size or local_pos.y < 0 or local_pos.y >= chunk_size or local_pos.z < 0 or local_pos.z >= chunk_size:
 		#wtf was i doing here
@@ -103,7 +128,7 @@ func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
 	if world.chunks.has(chunk_pos):
 		return world.chunks[chunk_pos][int(local_pos.x)][int(local_pos.y)][int(local_pos.z)]
 	#gets procedural generation if nothing can be referenced
-	return get_block_noise(local_pos+chunk_pos)
+	return get_block_noise(global_pos)
 
 func regenerate_chunks():
 	if not tagged_chunks.is_empty():

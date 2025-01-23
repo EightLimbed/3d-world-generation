@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://rqvooj081igb"]
 
-[ext_resource type="Texture2D" uid="uid://ce63f0aiq1t1p" path="res://Tileset.png" id="1_es6d7"]
+[ext_resource type="Texture2D" uid="uid://bpirrhbrxq1q7" path="res://Blocks.png" id="1_jblaw"]
 [ext_resource type="Script" path="res://World/Chunk.gd" id="2_3l77v"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f3ic6"]
@@ -8,7 +8,7 @@ transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0
 cull_mode = 2
-albedo_texture = ExtResource("1_es6d7")
+albedo_texture = ExtResource("1_jblaw")
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_2bg7a"]
 

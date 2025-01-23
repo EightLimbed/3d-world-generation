@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ce63f0aiq1t1p"
-path.s3tc="res://.godot/imported/Tileset.png-8b57c3b721721080420dc0358d85e828.s3tc.ctex"
+uid="uid://bpirrhbrxq1q7"
+path.s3tc="res://.godot/imported/Blocks.png-0c008f7e03a00937468d38c289ad6096.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Tileset.png"
-dest_files=["res://.godot/imported/Tileset.png-8b57c3b721721080420dc0358d85e828.s3tc.ctex"]
+source_file="res://Blocks.png"
+dest_files=["res://.godot/imported/Blocks.png-0c008f7e03a00937468d38c289ad6096.s3tc.ctex"]
 
 [params]
 

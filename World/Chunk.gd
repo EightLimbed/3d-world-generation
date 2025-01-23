@@ -8,9 +8,9 @@ var indices = PackedInt32Array()
 var uvs = PackedVector2Array()
 var face_count : int = 0
 #groups texture atlas is split into
-var tex_div = Vector2(0.16666,0.16666)
+var tex_div = Vector2(1.0/7.0,1.0/6.0)
 #list of transparent blocks, index is block id, boolean is whether or not it is transparent (air is always at the end)
-const transparent : Array = [true, false, false, false, true, false, true]
+const transparent : Array = [true, false, false, false, false, false, true, true]
 
 var blocks = []
 
@@ -24,6 +24,7 @@ func regenerate():
 
 func generate_chunk():
 	if not check_generated():
+		parent.generate_structures(position)
 		blocks = []
 		blocks.resize(parent.chunk_size)
 		for x in range(parent.chunk_size):
