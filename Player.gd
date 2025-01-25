@@ -36,10 +36,8 @@ func _physics_process(delta: float) -> void:
 		block_outline.visible = true
 		if Input.is_action_just_pressed("Break"):
 			set_block.emit(pos+Vector3(0.5,0.5,0.5), 0)
-			print(pos+Vector3(0.5,0.5,0.5))
 		if Input.is_action_just_pressed("Use"):
 			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), 6)
-			print(pos+Vector3(0.5,0.5,0.5)+norm)
 	else:
 		block_outline.visible = false
 	#movement
