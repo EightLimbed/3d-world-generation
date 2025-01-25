@@ -75,49 +75,58 @@ func create_mesh():
 
 func create_block(pos : Vector3, size : float, type : int):
 	#top
-	if not_transparent(pos + Vector3(0, size, 0), type):
-		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
-		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
-		vertices.append(pos + Vector3(-0.5+size, -0.5+size,  -0.5+size))
-		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
+	if not_transparent(pos + Vector3(0, 1, 0), type):
+		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(0.5, 0.5,  0.5))
+		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
 		update_indices()
 		add_uv(type-1,0)
 
 	#bottom
-	if not_transparent(pos + Vector3(0, -size, 0), type):
-		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
-		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
-		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5))
+	if not_transparent(pos + Vector3(0, -1, 0), type):
+		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
+		vertices.append(pos + Vector3(0.5, -0.5, 0.5))
+		vertices.append(pos + Vector3(0.5, -0.5, -0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
 		add_uv(type-1,1)
 
 	#left
-	if not_transparent(pos + Vector3(size, 0, 0), type):
-		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5+size))
-		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5))
-		vertices.append(pos + Vector3(-0.5+size, -0.5,-0.5))
-		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
+	if not_transparent(pos + Vector3(1, 0, 0), type):
+		vertices.append(pos + Vector3(0.5, 0.5, 0.5))
+		vertices.append(pos + Vector3(0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(0.5, -0.5,-0.5))
+		vertices.append(pos + Vector3(0.5, -0.5, 0.5))
 		update_indices()
 		add_uv(type-1,2)
 
 	#right
-	if not_transparent(pos + Vector3(-size, 0, 0), type):
-		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5))
-		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
-		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
+	if not_transparent(pos + Vector3(-1, 0, 0), type):
+		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
+		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
 		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
 		update_indices()
 		add_uv(type-1,3)
 
 	#front
-	if not_transparent(pos + Vector3(0, 0, size), type):
-		vertices.append(pos + Vector3(-0.5, -0.5+size, -0.5+size))
-		vertices.append(pos + Vector3(-0.5+size, -0.5+size, -0.5+size))
-		vertices.append(pos + Vector3(-0.5+size, -0.5, -0.5+size))
-		vertices.append(pos + Vector3(-0.5, -0.5, -0.5+size))
+	if not_transparent(pos + Vector3(0, 0, 1), type):
+		vertices.append(pos + Vector3(-0.5, 0.5, 0.5))
+		vertices.append(pos + Vector3(0.5, 0.5, 0.5))
+		vertices.append(pos + Vector3(0.5, -0.5, 0.5))
+		vertices.append(pos + Vector3(-0.5, -0.5, 0.5))
 		update_indices()
 		add_uv(type-1,4)
+
+	#back
+	if not_transparent(pos + Vector3(0, 0, -1), type):
+		vertices.append(pos + Vector3(0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(-0.5, 0.5, -0.5))
+		vertices.append(pos + Vector3(-0.5, -0.5, -0.5))
+		vertices.append(pos + Vector3(0.5, -0.5, -0.5))
+		update_indices()
+		add_uv(type-1,5)
 
 	#back
 	if not_transparent(pos + Vector3(0, 0, -size), type):
