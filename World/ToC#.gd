@@ -111,8 +111,8 @@ func update_indices():
 func not_transparent(pos, type):
 	var block = 0
 	if pos.x < 0 or pos.y < 0 or pos.z < 0 or pos.x >= chunk_size or pos.y >= chunk_size or pos.z >= chunk_size:
-		block = get_parent().parent.get_block(pos,get_parent().position)
-		#block = 0
+		#block = get_parent().parent.get_block(pos,get_parent().position)
+		block = 0
 	else:
 		block = blocks[pos.x][pos.y][pos.z]
 	if type == block:

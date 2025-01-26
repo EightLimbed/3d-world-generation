@@ -23,7 +23,8 @@ func create_mesh():
 	mesh = ArrayMesh.new()
 	a_mesh = ArrayMesh.new()
 	#gets values from C# script
-	var packed_mesh : Array = $MeshGenerator.create_mesh(blocks, parent.chunk_size)
+	var flat_array : Array = convert_to_flat_array(blocks)
+	var packed_mesh = get_node("/root/MeshGenerator").CreateMesh(flat_array[0], flat_array[1])
 	if not packed_mesh.is_empty():
 		#applies to mesh
 		var array = []
@@ -56,3 +57,12 @@ func check_generated():
 		blocks = parent.world.chunks[position]
 		return true
 	return false
+
+func convert_to_flat_array(blocks):
+	var flat_array = []
+	var size = blocks.size()
+	for z in range(size):
+		for y in range(size):
+			for x in range(size):
+				flat_array.append(blocks[x][y][z])
+	return [flat_array, size]

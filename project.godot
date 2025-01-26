@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.3", "C#", "Mobile")
 run/max_fps=999
 config/icon="res://icon.svg"
 
+[autoload]
+
+MeshGenerator="*res://World/MeshGenerator.cs"
+
 [display]
 
 window/vsync/vsync_mode=0
