@@ -4,7 +4,7 @@
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_w8whu")
-target_fps = 120.0
+render_distance = Vector3(9, 3, 9)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

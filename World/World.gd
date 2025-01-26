@@ -15,7 +15,7 @@ var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Dictionary
 var generated : bool = true
 var tagged_chunks : Dictionary
-@onready var chunks_per_frame : int = round((render_distance.x*render_distance.z)/2)
+@onready var chunks_per_frame : int = chunk_size
 var chunks_this_frame : int = 0
 signal new_frame
 var structures : Dictionary
