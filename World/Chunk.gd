@@ -4,11 +4,11 @@ var parent : Node
 
 var a_mesh = ArrayMesh.new()
 
-
-var blocks : Array[int] = []
+var blocks : PackedInt32Array = []
 
 func generate():
 	$Area3D/CollisionShape3D.shape.size = Vector3(parent.chunk_size, parent.chunk_size, parent.chunk_size)*2
+	$Area3D/CollisionShape3D.position = Vector3(parent.chunk_size, parent.chunk_size, parent.chunk_size)/2
 	generate_chunk()
 	create_mesh()
 

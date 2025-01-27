@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://d05b7vmvxv25g"]
+[gd_scene load_steps=4 format=3 uid="uid://d05b7vmvxv25g"]
 
-[ext_resource type="PackedScene" uid="uid://bnj0f5u4bugrd" path="res://World/World.tscn" id="1_fionh"]
+[ext_resource type="PackedScene" uid="uid://cqmuiyfkgcmlr" path="res://World/World.tscn" id="1_fionh"]
 [ext_resource type="PackedScene" uid="uid://bf00mwck5gp0h" path="res://Player.tscn" id="2_61grf"]
+[ext_resource type="PackedScene" uid="uid://bf61nnpvk8bhh" path="res://HUD.tscn" id="3_fdery"]
 
 [node name="Game" type="Node3D"]
 
@@ -9,3 +10,5 @@
 
 [node name="Player" parent="." instance=ExtResource("2_61grf")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0)
+
+[node name="HUD" parent="." instance=ExtResource("3_fdery")]

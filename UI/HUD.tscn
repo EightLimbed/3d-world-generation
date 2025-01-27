@@ -1,0 +1,109 @@
+[gd_scene load_steps=4 format=3 uid="uid://lfro81xe5xmq"]
+
+[ext_resource type="Script" path="res://UI/HUD.gd" id="1_a4mfr"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_8vts4"]
+font_size = 48
+
+[sub_resource type="LabelSettings" id="LabelSettings_tcpuh"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_a4mfr")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(1152, 648)
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = 32
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Settings:"
+label_settings = SubResource("LabelSettings_8vts4")
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Render Distance X,Z: 5"
+label_settings = SubResource("LabelSettings_tcpuh")
+horizontal_alignment = 1
+
+[node name="XZSlider" type="HSlider" parent="VBoxContainer/Subtitle"]
+layout_mode = 0
+offset_left = 288.0
+offset_top = 32.0
+offset_right = 864.0
+offset_bottom = 48.0
+max_value = 32.0
+step = 2.0
+value = 4.0
+
+[node name="Subtitle2" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Render Distance Y: 3"
+label_settings = SubResource("LabelSettings_tcpuh")
+horizontal_alignment = 1
+
+[node name="YSlider" type="HSlider" parent="VBoxContainer/Subtitle2"]
+layout_mode = 0
+offset_left = 288.0
+offset_top = 32.0
+offset_right = 864.0
+offset_bottom = 48.0
+max_value = 32.0
+step = 2.0
+value = 4.0
+
+[node name="Subtitle3" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "FPS: 60"
+label_settings = SubResource("LabelSettings_tcpuh")
+horizontal_alignment = 1
+
+[node name="FPSSlider" type="HSlider" parent="VBoxContainer/Subtitle3"]
+layout_mode = 0
+offset_left = 288.0
+offset_top = 32.0
+offset_right = 864.0
+offset_bottom = 48.0
+max_value = 1200.0
+step = 10.0
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="SaveButton" type="Button" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -72.0
+offset_top = 16.0
+offset_right = 72.0
+offset_bottom = 48.0
+grow_horizontal = 2
+text = "Save World"
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="ExitButton" type="Button" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -72.0
+offset_top = 16.0
+offset_right = 72.0
+offset_bottom = 48.0
+grow_horizontal = 2
+text = "Exit Game
+"
+
+[connection signal="value_changed" from="VBoxContainer/Subtitle/XZSlider" to="." method="_on_xz_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/Subtitle2/YSlider" to="." method="_on_y_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/Subtitle3/FPSSlider" to="." method="_on_fps_slider_value_changed"]
+[connection signal="pressed" from="VBoxContainer/Control/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Control2/ExitButton" to="." method="_on_exit_button_pressed"]

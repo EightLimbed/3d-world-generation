@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class MeshGenerator : Node
 {
@@ -12,7 +13,7 @@ public partial class MeshGenerator : Node
 	int faceCount = 0;
 	int chunkSize;
 	int[] blocks;
-
+	Node3D world;
 	public Godot.Collections.Array CreateMesh(int[] blockArray, int size)
 	{
 		// Initialize variables

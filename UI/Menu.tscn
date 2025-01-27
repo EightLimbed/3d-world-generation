@@ -1,0 +1,81 @@
+[gd_scene load_steps=4 format=3 uid="uid://q1gox41o04gb"]
+
+[ext_resource type="Script" path="res://UI/Menu.gd" id="1_5lxk4"]
+[ext_resource type="Texture2D" uid="uid://doht3capkp1ej" path="res://UI/Background.png" id="1_xijmr"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_d430l"]
+font_size = 48
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5lxk4")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+texture = ExtResource("1_xijmr")
+expand_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_top = 32.0
+offset_right = 1152.0
+offset_bottom = 648.0
+theme_override_constants/separation = 48
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "3D World Demo"
+label_settings = SubResource("LabelSettings_d430l")
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+
+[node name="NewButton" type="Button" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -144.0
+offset_top = 32.0
+offset_right = 144.0
+offset_bottom = 80.0
+grow_horizontal = 2
+text = "Create New World"
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -144.0
+offset_right = 144.0
+offset_bottom = 31.0
+grow_horizontal = 2
+placeholder_text = "Custom Seed..."
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="LoadButton" type="Button" parent="VBoxContainer/Control2"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -144.0
+offset_right = 144.0
+offset_bottom = 48.0
+grow_horizontal = 2
+text = "Load World From File"
+
+[connection signal="pressed" from="VBoxContainer/Control/NewButton" to="." method="_on_new_button_pressed"]
+[connection signal="text_changed" from="VBoxContainer/Control/LineEdit" to="." method="_on_line_edit_text_changed"]
