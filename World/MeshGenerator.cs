@@ -34,7 +34,11 @@ public partial class MeshGenerator : Node
 					int blockType = blocks[index];
 					if (blockType != 0) // Skip empty blocks
 					{
-						CreateBlock(new Vector3(x, y, z), blockType);
+						// Precompute face visibility
+						bool[] visibleFaces = GetVisibleFaces(new Vector3(x, y, z), blockType);
+
+						// Add block with visible faces only
+						CreateBlock(new Vector3(x, y, z), blockType, visibleFaces);
 					}
 				}
 			}
@@ -51,9 +55,10 @@ public partial class MeshGenerator : Node
 		}
 	}
 
-	void CreateBlock(Vector3 pos, int type)
+	void CreateBlock(Vector3 pos, int type, bool[] visibleFaces)
 	{
-		if (NotTransparent(pos + new Vector3(0, 1, 0), type))
+		// Top face
+		if (visibleFaces[0])
 		{
 			vertices.Add(pos + new Vector3(-0.5f, 0.5f, -0.5f));
 			vertices.Add(pos + new Vector3(0.5f, 0.5f, -0.5f));
@@ -63,7 +68,8 @@ public partial class MeshGenerator : Node
 			AddUv(type - 1, 0);
 		}
 
-		if (NotTransparent(pos + new Vector3(0, -1, 0), type))
+		// Bottom face
+		if (visibleFaces[1])
 		{
 			vertices.Add(pos + new Vector3(-0.5f, -0.5f, 0.5f));
 			vertices.Add(pos + new Vector3(0.5f, -0.5f, 0.5f));
@@ -73,7 +79,8 @@ public partial class MeshGenerator : Node
 			AddUv(type - 1, 1);
 		}
 
-		if (NotTransparent(pos + new Vector3(1, 0, 0), type))
+		// Right face
+		if (visibleFaces[2])
 		{
 			vertices.Add(pos + new Vector3(0.5f, 0.5f, 0.5f));
 			vertices.Add(pos + new Vector3(0.5f, 0.5f, -0.5f));
@@ -83,7 +90,8 @@ public partial class MeshGenerator : Node
 			AddUv(type - 1, 2);
 		}
 
-		if (NotTransparent(pos + new Vector3(-1, 0, 0), type))
+		// Left face
+		if (visibleFaces[3])
 		{
 			vertices.Add(pos + new Vector3(-0.5f, 0.5f, -0.5f));
 			vertices.Add(pos + new Vector3(-0.5f, 0.5f, 0.5f));
@@ -93,7 +101,8 @@ public partial class MeshGenerator : Node
 			AddUv(type - 1, 3);
 		}
 
-		if (NotTransparent(pos + new Vector3(0, 0, 1), type))
+		// Front face
+		if (visibleFaces[4])
 		{
 			vertices.Add(pos + new Vector3(-0.5f, 0.5f, 0.5f));
 			vertices.Add(pos + new Vector3(0.5f, 0.5f, 0.5f));
@@ -103,7 +112,8 @@ public partial class MeshGenerator : Node
 			AddUv(type - 1, 4);
 		}
 
-		if (NotTransparent(pos + new Vector3(0, 0, -1), type))
+		// Back face
+		if (visibleFaces[5])
 		{
 			vertices.Add(pos + new Vector3(0.5f, 0.5f, -0.5f));
 			vertices.Add(pos + new Vector3(-0.5f, 0.5f, -0.5f));
@@ -112,7 +122,53 @@ public partial class MeshGenerator : Node
 			UpdateIndices();
 			AddUv(type - 1, 5);
 		}
+	}
 
+	bool[] GetVisibleFaces(Vector3 pos, int type)
+	{
+		bool[] visibleFaces = new bool[6];
+		Vector3[] directions = {
+			new Vector3(0, 1, 0),   // Top
+			new Vector3(0, -1, 0),  // Bottom
+			new Vector3(1, 0, 0),   // Right
+			new Vector3(-1, 0, 0),  // Left
+			new Vector3(0, 0, 1),   // Front
+			new Vector3(0, 0, -1)   // Back
+		};
+
+		for (int i = 0; i < 6; i++)
+		{
+			visibleFaces[i] = NotTransparent(pos + directions[i], type);
+		}
+
+		return visibleFaces;
+	}
+
+	bool NotTransparent(Vector3 pos, int type)
+	{
+		int x = (int)pos.X;
+		int y = (int)pos.Y;
+		int z = (int)pos.Z;
+
+		if (x < 0 || y < 0 || z < 0 || x >= chunkSize || y >= chunkSize || z >= chunkSize)
+		{
+			return true;
+		}
+
+		int neighborIndex = GetIndex(x, y, z);
+		int neighborType = blocks[neighborIndex];
+
+		if (type == neighborType)
+		{
+			return false;
+		}
+
+		return transparency[neighborType];
+	}
+
+	int GetIndex(int x, int y, int z)
+	{
+		return z + chunkSize * (y + chunkSize * x);
 	}
 
 	void AddUv(int x, int y)
@@ -132,32 +188,5 @@ public partial class MeshGenerator : Node
 		indices.Add(faceCount * 4 + 2);
 		indices.Add(faceCount * 4 + 3);
 		faceCount += 1;
-	}
-
-	bool NotTransparent(Vector3 pos, int type)
-	{
-		int x = (int)pos.X;
-		int y = (int)pos.Y;
-		int z = (int)pos.Z;
-
-		if (x < 0 || y < 0 || z < 0 || x >= chunkSize-1 || y >= chunkSize-1 || z >= chunkSize-1)
-		{
-			return true;
-		}
-
-		int neighborIndex = GetIndex(x, y, z);
-		int neighborType = blocks[neighborIndex];
-
-		if (type == neighborType)
-		{
-			return false;
-		}
-
-		return transparency[neighborType];
-	}
-
-	int GetIndex(int x, int y, int z)
-	{
-		return x + chunkSize * (y + chunkSize * z);
 	}
 }

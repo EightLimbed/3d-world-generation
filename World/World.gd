@@ -78,9 +78,10 @@ func set_block(global_pos : Vector3, block):
 	var updated_pos = global_pos-chunk_pos
 	#sets block in memory to the new block, or adds it to structure queue
 	if chunk_pos in world.chunks:
-		world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
+		world.chunks[chunk_pos][get_flat_index(floor(updated_pos))] = block
 		#finds chunks with chunk position and tags it for regeneration based on memory
 		tagged_chunks[chunk_pos] = true
+		return
 		#if chunk borders another chunk, tag that one regeneration that one too
 		if updated_pos.x > chunk_size-1:
 			tagged_chunks[chunk_pos+Vector3(chunk_size,0,0)] = true
@@ -157,6 +158,9 @@ func _process(delta: float) -> void:
 func pos_to_chunk(pos) -> Vector3:
 	return round(pos/chunk_size)*chunk_size
 
+func get_flat_index(pos: Vector3):
+	return pos.z + chunk_size * (pos.y + chunk_size * pos.x);
+
 func remove_chunks(pos: Vector3):
 	var updated_pos = pos_to_chunk(pos)
 	var to_remove = []
@@ -197,5 +201,5 @@ func longest_distance(vec3 : Vector3):
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
-		print("Saved")
+		pass
 		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")
