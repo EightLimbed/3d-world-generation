@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://lfro81xe5xmq"]
+[gd_scene load_steps=6 format=3 uid="uid://lfro81xe5xmq"]
 
 [ext_resource type="Script" path="res://UI/HUD.gd" id="1_a4mfr"]
+[ext_resource type="Texture2D" uid="uid://mkgj1d4fpyjj" path="res://UI/Hotbar.png" id="2_rlgps"]
+[ext_resource type="Texture2D" uid="uid://cshs5l4jtdnf0" path="res://UI/HotbarIndicator.png" id="3_ppodh"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8vts4"]
 font_size = 48
@@ -10,25 +12,30 @@ font_size = 48
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_a4mfr")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Information" type="Label" parent="."]
+visible = false
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="Settings" type="VBoxContainer" parent="."]
 custom_minimum_size = Vector2(1152, 648)
 offset_right = 40.0
 offset_bottom = 40.0
 theme_override_constants/separation = 32
 
-[node name="Title" type="Label" parent="VBoxContainer"]
+[node name="Title" type="Label" parent="Settings"]
 layout_mode = 2
 text = "Settings:"
 label_settings = SubResource("LabelSettings_8vts4")
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="VBoxContainer"]
+[node name="Subtitle" type="Label" parent="Settings"]
 layout_mode = 2
 text = "Render Distance X,Z: 5"
 label_settings = SubResource("LabelSettings_tcpuh")
 horizontal_alignment = 1
 
-[node name="XZSlider" type="HSlider" parent="VBoxContainer/Subtitle"]
+[node name="XZSlider" type="HSlider" parent="Settings/Subtitle"]
 layout_mode = 0
 offset_left = 288.0
 offset_top = 32.0
@@ -38,13 +45,13 @@ max_value = 32.0
 step = 2.0
 value = 4.0
 
-[node name="Subtitle2" type="Label" parent="VBoxContainer"]
+[node name="Subtitle2" type="Label" parent="Settings"]
 layout_mode = 2
 text = "Render Distance Y: 3"
 label_settings = SubResource("LabelSettings_tcpuh")
 horizontal_alignment = 1
 
-[node name="YSlider" type="HSlider" parent="VBoxContainer/Subtitle2"]
+[node name="YSlider" type="HSlider" parent="Settings/Subtitle2"]
 layout_mode = 0
 offset_left = 288.0
 offset_top = 32.0
@@ -54,13 +61,13 @@ max_value = 32.0
 step = 2.0
 value = 4.0
 
-[node name="Subtitle3" type="Label" parent="VBoxContainer"]
+[node name="Subtitle3" type="Label" parent="Settings"]
 layout_mode = 2
-text = "FPS: 60"
+text = "Target FPS: 60"
 label_settings = SubResource("LabelSettings_tcpuh")
 horizontal_alignment = 1
 
-[node name="FPSSlider" type="HSlider" parent="VBoxContainer/Subtitle3"]
+[node name="FPSSlider" type="HSlider" parent="Settings/Subtitle3"]
 layout_mode = 0
 offset_left = 288.0
 offset_top = 32.0
@@ -69,41 +76,79 @@ offset_bottom = 48.0
 max_value = 1200.0
 step = 10.0
 
-[node name="Control" type="Control" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 64)
+[node name="Control3" type="Control" parent="Settings"]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
-[node name="SaveButton" type="Button" parent="VBoxContainer/Control"]
+[node name="FlightButton" type="Button" parent="Settings/Control3"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -72.0
-offset_top = 16.0
+offset_top = 24.0
 offset_right = 72.0
-offset_bottom = 48.0
+offset_bottom = 56.0
+grow_horizontal = 2
+text = "Flight: Off"
+
+[node name="Control" type="Control" parent="Settings"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+
+[node name="SaveButton" type="Button" parent="Settings/Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -72.0
+offset_top = 24.0
+offset_right = 72.0
+offset_bottom = 56.0
 grow_horizontal = 2
 text = "Save World"
 
-[node name="Control2" type="Control" parent="VBoxContainer"]
+[node name="Control2" type="Control" parent="Settings"]
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 
-[node name="ExitButton" type="Button" parent="VBoxContainer/Control2"]
+[node name="ExitButton" type="Button" parent="Settings/Control2"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -72.0
-offset_top = 16.0
 offset_right = 72.0
-offset_bottom = 48.0
+offset_bottom = 32.0
 grow_horizontal = 2
 text = "Exit Game
 "
 
-[connection signal="value_changed" from="VBoxContainer/Subtitle/XZSlider" to="." method="_on_xz_slider_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/Subtitle2/YSlider" to="." method="_on_y_slider_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/Subtitle3/FPSSlider" to="." method="_on_fps_slider_value_changed"]
-[connection signal="pressed" from="VBoxContainer/Control/SaveButton" to="." method="_on_save_button_pressed"]
-[connection signal="pressed" from="VBoxContainer/Control2/ExitButton" to="." method="_on_exit_button_pressed"]
+[node name="Hotbar" type="TextureRect" parent="."]
+texture_filter = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -172.0
+offset_top = -66.0
+offset_right = 172.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("2_rlgps")
+
+[node name="Indicator" type="TextureRect" parent="Hotbar"]
+layout_mode = 0
+offset_top = -14.0
+offset_right = 50.0
+offset_bottom = 50.0
+texture = ExtResource("3_ppodh")
+
+[connection signal="value_changed" from="Settings/Subtitle/XZSlider" to="." method="_on_xz_slider_value_changed"]
+[connection signal="value_changed" from="Settings/Subtitle2/YSlider" to="." method="_on_y_slider_value_changed"]
+[connection signal="value_changed" from="Settings/Subtitle3/FPSSlider" to="." method="_on_fps_slider_value_changed"]
+[connection signal="pressed" from="Settings/Control3/FlightButton" to="." method="_on_flight_button_pressed"]
+[connection signal="pressed" from="Settings/Control/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="Settings/Control2/ExitButton" to="." method="_on_exit_button_pressed"]

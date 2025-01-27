@@ -1,12 +1,6 @@
 extends CanvasLayer
 
-@export var menu : PackedScene
 @onready var world = get_tree().root.get_node("Game/World")
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -19,13 +13,51 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		$Settings.visible = false
 	elif event.is_action_pressed("ui_cancel"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		$Settings.visible = true
+		if $Settings.visible:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			$Settings.visible = false
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			$Settings.visible = true
 	if event.is_action_pressed("Information"):
 		if $Information.visible:
 			$Information.visible = false
 		else:
 			$Information.visible = true
+	#hotbar
+	if event.is_action_pressed("ScrollUp"):
+		if world.player.block > 1:
+			world.player.block -= 1
+		else:
+			world.player.block = 7
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("ScrollDown"):
+		if world.player.block < 7:
+			world.player.block += 1
+		else:
+			world.player.block = 1
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("1"):
+		world.player.block = 1
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("2"):
+		world.player.block = 2
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("3"):
+		world.player.block = 3
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("4"):
+		world.player.block = 4
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("5"):
+		world.player.block = 5
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("6"):
+		world.player.block = 6
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
+	if event.is_action_pressed("7"):
+		world.player.block = 7
+		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
 
 func save():
 	world.save()
@@ -50,4 +82,13 @@ func _on_save_button_pressed() -> void:
 
 func _on_exit_button_pressed() -> void:
 	save()
-	get_tree().root.change_scene_to_file("res://Menu.tscn")
+	get_tree().change_scene_to_file("res://UI/Menu.tscn")
+	get_tree().root.get_node("Game").queue_free()
+
+func _on_flight_button_pressed() -> void:
+	if world.player.flight:
+		$Settings/Control3/FlightButton.text = "Flight: Off"
+		world.player.flight = false
+	else:
+		$Settings/Control3/FlightButton.text = "Flight: On"
+		world.player.flight = true

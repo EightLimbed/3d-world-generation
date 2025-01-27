@@ -19,6 +19,5 @@ func _on_new_button_pressed() -> void:
 	get_tree().root.add_child(instance)
 	queue_free()
 
-
 func _on_line_edit_text_changed(new_text: String) -> void:
 	seeded = int(new_text)
