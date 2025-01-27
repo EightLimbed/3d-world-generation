@@ -8,6 +8,7 @@
 font_size = 48
 
 [node name="Menu" type="Control"]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,5 +80,17 @@ offset_bottom = 48.0
 grow_horizontal = 2
 text = "Load World From File"
 
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Load World"
+position = Vector2i(96, 96)
+size = Vector2i(576, 324)
+ok_button_text = "Open"
+file_mode = 0
+access = 1
+root_subfolder = "user://worlds"
+show_hidden_files = true
+
 [connection signal="pressed" from="VBoxContainer/Control/NewButton" to="." method="_on_new_button_pressed"]
 [connection signal="text_changed" from="VBoxContainer/Control/LineEdit" to="." method="_on_line_edit_text_changed"]
+[connection signal="pressed" from="VBoxContainer/Control2/LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

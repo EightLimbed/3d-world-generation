@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://lfro81xe5xmq" path="res://UI/HUD.tscn" id="3_2md84"]
 
 [node name="Game" type="Node3D"]
+process_mode = 1
 
 [node name="World" parent="." instance=ExtResource("1_fionh")]
 
@@ -12,3 +13,4 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0)
 
 [node name="HUD" parent="." instance=ExtResource("3_2md84")]
+process_mode = 3

@@ -152,6 +152,3 @@ func create_chunk(pos : Vector3):
 
 func longest_distance(vec3 : Vector3):
 	return max(abs(vec3.x), abs(vec3.y), abs(vec3.z))
-
-func save():
-	pass

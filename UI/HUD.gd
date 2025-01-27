@@ -15,10 +15,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("ui_cancel"):
 		if $Settings.visible:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			$Hotbar.visible = true
 			$Settings.visible = false
+			get_tree().paused = false
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			$Hotbar.visible = false
 			$Settings.visible = true
+			get_tree().paused = true
 	if event.is_action_pressed("Information"):
 		if $Information.visible:
 			$Information.visible = false
@@ -59,14 +63,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		world.player.block = 7
 		$Hotbar/Indicator.position.x = 49*(world.player.block-1)
 
-func save():
-	world.save()
-
 func _on_xz_slider_value_changed(value: float) -> void:
 	world.render_distance.x = value+1
 	world.render_distance.z = value+1
 	world.center = world.chunk_size*world.render_distance/2
-	$Settings/Subtitle.text = "Render Distance X,Z: "+str(value+1)
+	$Settings/Subtitle.text = "Render Distance X and Z: "+str(value+1)
 
 func _on_y_slider_value_changed(value: float) -> void:
 	world.render_distance.y = value+1
@@ -78,10 +79,9 @@ func _on_fps_slider_value_changed(value: float) -> void:
 	$Settings/Subtitle3.text = "Target FPS: "+str(value)
 
 func _on_save_button_pressed() -> void:
-	save()
+	$FileDialog.popup()
 
 func _on_exit_button_pressed() -> void:
-	save()
 	get_tree().change_scene_to_file("res://UI/Menu.tscn")
 	get_tree().root.get_node("Game").queue_free()
 
@@ -92,3 +92,6 @@ func _on_flight_button_pressed() -> void:
 	else:
 		$Settings/Control3/FlightButton.text = "Flight: On"
 		world.player.flight = true
+
+func _on_file_dialog_file_selected(path: String) -> void:
+	ResourceSaver.save(world.world, path)

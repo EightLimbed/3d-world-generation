@@ -21,3 +21,13 @@ func _on_new_button_pressed() -> void:
 
 func _on_line_edit_text_changed(new_text: String) -> void:
 	seeded = int(new_text)
+
+func _on_load_button_pressed() -> void:
+	$FileDialog.popup()
+
+func _on_file_dialog_file_selected(path: String) -> void:
+	var loaded_world = ResourceLoader.load(path)
+	var instance = game.instantiate()
+	instance.get_node("World").world = loaded_world
+	get_tree().root.add_child(instance)
+	queue_free()
