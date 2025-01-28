@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://q1gox41o04gb"]
 
 [ext_resource type="Script" path="res://UI/Menu.gd" id="1_5lxk4"]
-[ext_resource type="Texture2D" uid="uid://doht3capkp1ej" path="res://UI/Background.png" id="1_xijmr"]
+[ext_resource type="Texture2D" uid="uid://dx3h3kx3sf1ip" path="res://UI/Background.png" id="1_xijmr"]
 [ext_resource type="PackedScene" uid="uid://d05b7vmvxv25g" path="res://Game.tscn" id="2_u7x27"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_d430l"]
@@ -30,7 +30,7 @@ layout_mode = 0
 offset_top = 32.0
 offset_right = 1152.0
 offset_bottom = 648.0
-theme_override_constants/separation = 48
+theme_override_constants/separation = 64
 
 [node name="Title" type="Label" parent="VBoxContainer"]
 layout_mode = 2
@@ -63,7 +63,7 @@ offset_left = -144.0
 offset_right = 144.0
 offset_bottom = 31.0
 grow_horizontal = 2
-placeholder_text = "Custom Seed..."
+placeholder_text = "Custom Seed (integer)..."
 
 [node name="Control2" type="Control" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 64)

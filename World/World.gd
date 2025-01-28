@@ -76,7 +76,7 @@ func set_block(global_pos : Vector3, block):
 	var chunk_pos = pos_to_chunk(global_pos)-reference_offset
 	var updated_pos = global_pos-chunk_pos
 	#sets block in memory to the new block, or adds it to structure queue
-	if chunk_pos in world.chunks and floor(player.position) != floor(global_pos):
+	if chunk_pos in world.chunks and (round(player.position) != floor(global_pos) and round(player.position+Vector3(0,1,0)) != floor(global_pos)):
 		world.chunks[chunk_pos][get_flat_index(floor(updated_pos))] = block
 		#finds chunks with chunk position and tags it for regeneration based on memory
 		tagged_chunks[chunk_pos] = true
