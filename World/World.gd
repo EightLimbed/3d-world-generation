@@ -1,9 +1,9 @@
 extends Node3D
 
-var world = preload("res://World/Resources/Eden.tres")
+var world : World
 
 #size of each chunk, in blocks (x,y,z)
-@export var chunk_size : int = 24
+const chunk_size : int = 24
 #always make this odd
 @export var render_distance : Vector3 = Vector3i(5,3,5)
 @export var target_fps : float = 60
@@ -15,7 +15,7 @@ var chunk = preload("res://World/Chunk.tscn")
 var rendered_chunks : Dictionary
 var generated : bool = true
 var tagged_chunks : Dictionary
-@onready var chunks_per_frame : int = (render_distance.x*render_distance.z)/2
+@onready var chunks_per_frame : int = round(render_distance.x*render_distance.y)
 var chunks_this_frame : int = 0
 signal new_frame
 var structures : Dictionary
@@ -25,7 +25,6 @@ var tree : Dictionary = {Vector3(0, 0, 0): 5, Vector3(0, 1, 0): 5, Vector3(0, 2,
 @onready var random = RandomNumberGenerator.new()
 @onready var player = get_parent().get_child(1)
 @onready var chunk_container = $ChunkContainer
-@onready var label = $CanvasLayer/Label
 
 func _ready() -> void:
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN
@@ -37,7 +36,7 @@ func _ready() -> void:
 	rendered_chunks.clear()
 	structures.clear()
 
-func get_block_noise(pos: Vector3):
+func get_block_noise(pos: Vector3) -> int:
 	#gets noise
 	if structures.has(pos):
 		var block = structures[pos]
@@ -77,55 +76,12 @@ func set_block(global_pos : Vector3, block):
 	var chunk_pos = pos_to_chunk(global_pos)-reference_offset
 	var updated_pos = global_pos-chunk_pos
 	#sets block in memory to the new block, or adds it to structure queue
-	if chunk_pos in world.chunks:
-		world.chunks[chunk_pos][updated_pos.x][updated_pos.y][updated_pos.z] = block
+	if chunk_pos in world.chunks and (round(player.position) != floor(global_pos) and round(player.position+Vector3(0,1,0)) != floor(global_pos)):
+		world.chunks[chunk_pos][get_flat_index(floor(updated_pos))] = block
 		#finds chunks with chunk position and tags it for regeneration based on memory
 		tagged_chunks[chunk_pos] = true
-		#if chunk borders another chunk, tag that one regeneration that one too
-		if updated_pos.x > chunk_size-1:
-			tagged_chunks[chunk_pos+Vector3(chunk_size,0,0)] = true
-		if updated_pos.x < 1:
-			tagged_chunks[chunk_pos+Vector3(-chunk_size,0,0)] = true
-		if updated_pos.y > chunk_size-1:
-			tagged_chunks[chunk_pos+Vector3(0,chunk_size,0)] = true
-		if updated_pos.y < 1:
-			tagged_chunks[chunk_pos+Vector3(0,-chunk_size,0)] = true
-		if updated_pos.z > chunk_size-1:
-			tagged_chunks[chunk_pos+Vector3(0,0,chunk_size)] = true
-		if updated_pos.z < 1:
-			tagged_chunks[chunk_pos+Vector3(0,0,-chunk_size)] = true
 	else:
 		structures[global_pos] = block
-
-#noise parameters
-func get_block(local_pos: Vector3, chunk_pos : Vector3) -> int:
-	var global_pos = local_pos+chunk_pos
-	# handle neighboring chunks
-	if local_pos.x < 0 or local_pos.x >= chunk_size or local_pos.y < 0 or local_pos.y >= chunk_size or local_pos.z < 0 or local_pos.z >= chunk_size:
-		#wtf was i doing here
-		if local_pos.x < 0:
-			chunk_pos.x -= chunk_size
-			local_pos.x += chunk_size
-		elif local_pos.x >= chunk_size:
-			chunk_pos.x += chunk_size
-			local_pos.x -= chunk_size
-		if local_pos.y < 0:
-			chunk_pos.y -= chunk_size
-			local_pos.y += chunk_size
-		elif local_pos.y >= chunk_size:
-			chunk_pos.y += chunk_size
-			local_pos.y -= chunk_size
-		if local_pos.z < 0:
-			chunk_pos.z -= chunk_size
-			local_pos.z += chunk_size
-		elif local_pos.z >= chunk_size:
-			chunk_pos.z += chunk_size
-			local_pos.z -= chunk_size
-	#gets block if it can
-	if world.chunks.has(chunk_pos):
-		return world.chunks[chunk_pos][int(local_pos.x)][int(local_pos.y)][int(local_pos.z)]
-	#gets procedural generation if nothing can be referenced
-	return get_block_noise(global_pos)
 
 func regenerate_chunks():
 	if not tagged_chunks.is_empty():
@@ -151,11 +107,12 @@ func _process(delta: float) -> void:
 	#if old operation is done, starts new one
 	if generated:
 		create_chunks(player.position)
-	#display useful information
-	label.text = "total chunks: " + str(chunk_container.get_child_count()) + "\nfps: " + str(Engine.get_frames_per_second())+ "\ncoordinates: " + str(round(player.position))+ "\nchunk: " + str(pos_to_chunk(player.position)-reference_offset)+ "\nchunks per frame: " + str(chunks_per_frame+1)
 
 func pos_to_chunk(pos) -> Vector3:
 	return round(pos/chunk_size)*chunk_size
+
+func get_flat_index(pos: Vector3):
+	return pos.z + chunk_size * (pos.y + chunk_size * pos.x);
 
 func remove_chunks(pos: Vector3):
 	var updated_pos = pos_to_chunk(pos)
@@ -178,7 +135,6 @@ func create_chunks(pos : Vector3):
 				#creates chunk at position if chunk not already rendered
 				if updated_pos not in rendered_chunks:
 					create_chunk(updated_pos)
-					chunks_this_frame += 1
 				if chunks_this_frame >= chunks_per_frame:
 					await new_frame
 	generated = true
@@ -191,11 +147,8 @@ func create_chunk(pos : Vector3):
 	chunk_container.add_child(instance)
 	generate_structures(instance.position)
 	instance.generate()
+	if instance.blocks.size() > 10:
+		chunks_this_frame += 1
 
 func longest_distance(vec3 : Vector3):
 	return max(abs(vec3.x), abs(vec3.y), abs(vec3.z))
-
-func _input(event):
-	if event.is_action_pressed("ui_cancel"):
-		print("Saved")
-		#ResourceSaver.save(world, "res://World/Resources/Eden.tres")

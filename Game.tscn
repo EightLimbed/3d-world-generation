@@ -1,11 +1,33 @@
-[gd_scene load_steps=3 format=3 uid="uid://d05b7vmvxv25g"]
+[gd_scene load_steps=7 format=3 uid="uid://d05b7vmvxv25g"]
 
-[ext_resource type="PackedScene" uid="uid://bnj0f5u4bugrd" path="res://World/World.tscn" id="1_fionh"]
+[ext_resource type="PackedScene" uid="uid://cqmuiyfkgcmlr" path="res://World/World.tscn" id="1_fionh"]
 [ext_resource type="PackedScene" uid="uid://bf00mwck5gp0h" path="res://Player.tscn" id="2_61grf"]
+[ext_resource type="PackedScene" uid="uid://lfro81xe5xmq" path="res://UI/HUD.tscn" id="3_2md84"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_igd1a"]
+sky_top_color = Color(0.67054, 0.999568, 1, 1)
+ground_bottom_color = Color(0.344076, 0.344076, 0.344076, 1)
+
+[sub_resource type="Sky" id="Sky_f5k6a"]
+sky_material = SubResource("ProceduralSkyMaterial_igd1a")
+
+[sub_resource type="Environment" id="Environment_1yky1"]
+background_mode = 2
+sky = SubResource("Sky_f5k6a")
+ambient_light_source = 2
+ambient_light_color = Color(0.376471, 0.376471, 0.376471, 1)
+reflected_light_source = 1
 
 [node name="Game" type="Node3D"]
+process_mode = 1
 
 [node name="World" parent="." instance=ExtResource("1_fionh")]
 
 [node name="Player" parent="." instance=ExtResource("2_61grf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 64, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 32, 0)
+
+[node name="HUD" parent="." instance=ExtResource("3_2md84")]
+process_mode = 3
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1yky1")

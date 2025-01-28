@@ -1,9 +1,11 @@
 extends CharacterBody3D
 
 const SPEED = 10.0
-const JUMP_VELOCITY = 4.5
+const JUMP_VELOCITY = 8
+var block : int = 1
+var flight = false
 
-var gravity: int = 9
+var gravity: int = 18
 @onready var neck := $Neck
 @onready var camera := $Neck/Camera
 @onready var collision = $CollisionShape3D
@@ -12,11 +14,7 @@ var gravity: int = 9
 signal set_block(hit_chunk : Node, global_pos : Vector3, block)
 
 func _unhandled_input(event: InputEvent) -> void:
-	#camera and mouse mode
-	if event is InputEventMouseButton:
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	elif event.is_action_pressed("ui_cancel"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	#camera
 	if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if event is InputEventMouseMotion:
 			neck.rotate_y(-event.relative.x * 0.01)
@@ -37,14 +35,17 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("Break"):
 			set_block.emit(pos+Vector3(0.5,0.5,0.5), 0)
 		if Input.is_action_just_pressed("Use"):
-			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), 6)
+			set_block.emit(pos+norm+Vector3(0.5,0.5,0.5), block)
 	else:
 		block_outline.visible = false
 	#movement
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-	if Input.is_action_just_pressed("ui_accept"):
-		velocity.y = JUMP_VELOCITY
+	if Input.is_action_pressed("Jump"):
+		if flight:
+			velocity.y = JUMP_VELOCITY
+		elif is_on_floor():
+			velocity.y = JUMP_VELOCITY
 	var input_dir := Input.get_vector("Left", "Right", "Forward", "Back")
 	var direction = (neck.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if direction:
