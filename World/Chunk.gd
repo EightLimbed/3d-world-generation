@@ -23,7 +23,6 @@ func create_mesh():
 	mesh = ArrayMesh.new()
 	a_mesh = ArrayMesh.new()
 	#gets values from C# script
-	#var flat_array : Array = convert_to_flat_array(blocks)
 	var packed_mesh = get_node("/root/MeshGenerator").CreateMesh(blocks, parent.chunk_size)
 	if not packed_mesh.is_empty():
 		#applies to mesh

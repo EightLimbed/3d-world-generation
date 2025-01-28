@@ -9,7 +9,7 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	#camera and mouse mode
-	if event is InputEventMouseButton:
+	if event is InputEventMouseButton and $Settings.visible == false:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		$Settings.visible = false
 	elif event.is_action_pressed("ui_cancel"):
@@ -82,6 +82,7 @@ func _on_save_button_pressed() -> void:
 	$FileDialog.popup()
 
 func _on_exit_button_pressed() -> void:
+	get_tree().paused = false
 	get_tree().change_scene_to_file("res://UI/Menu.tscn")
 	get_tree().root.get_node("Game").queue_free()
 

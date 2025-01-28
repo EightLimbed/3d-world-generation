@@ -22,11 +22,14 @@ MeshGenerator="*res://World/MeshGenerator.cs"
 
 [display]
 
+window/subwindows/embed_subwindows=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_width"
 window/vsync/vsync_mode=0
 
 [dotnet]
 
-project/assembly_name="3D World Generation"
+project/assembly_name="BlockDemo"
 
 [input]
 
